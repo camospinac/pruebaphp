@@ -1,0 +1,32 @@
+services:
+  # 1. El Servidor Web (Tu aplicación Laravel)
+  - type: web
+    name: financepwa 
+    env: php
+    plan: free 
+    buildCommand: |
+      composer install --no-dev
+      npm install
+      npm run build
+      php artisan config:cache
+      php artisan event:cache
+      php artisan route:cache
+      php artisan view:cache
+      php artisan storage:link
+      php artisan migrate --force
+    startCommand: php artisan serve --host 0.0.0.0 --port $PORT
+
+  # 2. La Base de Datos
+  - type: pserv
+    name: finance # Puedes cambiarle el nombre
+    env: postgres # O mysql
+    plan: free # Plan gratuito de PostgreSQL
+    disk:
+      sizeGB: 1
+
+  # 3. La Tarea Programada (Cron Job) para los pagos automáticos
+  - type: cron
+    name: procesador-de-pagos
+    env: php
+    schedule: "0 5 * * *" # Todos los días a las 5 AM UTC (medianoche en Colombia)
+    command: php artisan payments:process-due
