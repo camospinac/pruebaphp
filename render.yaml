@@ -29,4 +29,4 @@ services:
     name: procesador-de-pagos
     env: php
     schedule: "0 5 * * *" # Todos los días a las 5 AM UTC (medianoche en Colombia)
-    command: php artisan payments:process-due
+    startCommand: php artisan payments:process-due
