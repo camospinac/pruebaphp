@@ -4,7 +4,7 @@ services:
     name: mi-app-web
     runtime: php
     plan: free
-    region: ohio # Usando una región de USA
+    region: ohio 
     buildCommand: |
       composer install --no-dev --optimize-autoloader
       npm install && npm run build
@@ -35,22 +35,23 @@ services:
         fromService:
           type: pserv
           name: mi-base-de-datos
-          property: databaseName # Nombre de propiedad correcto
+          property: databaseName
       - key: DB_USERNAME
         fromService:
           type: pserv
           name: mi-base-de-datos
-          property: user # Nombre de propiedad correcto
+          property: user
       - key: DB_PASSWORD
         fromService:
           type: pserv
           name: mi-base-de-datos
-          property: password # Nombre de propiedad correcto
-      - key: APP_KEY # <-- ¡LA ÚNICA QUE DEBES PONER A MANO!
+          property: password
+      - key: APP_KEY
         sync: false
 
-  # 2. La Base de Datos (Definida aquí)
+  # 2. La Base de Datos
   - type: pserv
     name: mi-base-de-datos
     plan: free
-    postgresMajorVersion: 15
+    engine: postgresql # <-- La palabra clave correcta es 'engine'
+    engineVersion: 15 # <-- La palabra clave correcta es 'engineVersion'
