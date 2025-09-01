@@ -1,82 +1,29 @@
 services:
-  # 1. El Servidor Web (Tu aplicación Laravel)
   - type: web
     name: financepwa
-    runtime: php # <-- CORRECCIÓN
+    runtime: php
     plan: free
-    buildFilter:
-      paths:
-      - "app/**"
-      - "bootstrap/**"
-      - "config/**"
-      - "database/**"
-      - "public/**"
-      - "resources/**"
-      - "routes/**"
-      - "composer.json"
-      - "package.json"
-      - "vite.config.js"
     buildCommand: |
       composer install --no-dev --optimize-autoloader
-      npm install
-      npm run build
-      php artisan config:cache
-      php artisan route:cache
+      npm install && npm run build
       php artisan storage:link
       php artisan migrate --force
     startCommand: php artisan serve --host 0.0.0.0 --port $PORT
     envVars:
-      - key: APP_ENV
-        value: production
-      - key: APP_DEBUG
-        value: false
       - key: APP_URL
         fromService:
           type: web
           name: financepwa
           property: url
-      - key: DB_CONNECTION
-        value: pgsql
-      - key: DB_HOST
+      - key: DATABASE_URL
         fromService:
           type: pserv
           name: finance
-          property: host
-      - key: DB_PORT
-        fromService:
-          type: pserv
-          name: finance
-          property: port
-      - key: DB_DATABASE
-        fromService:
-          type: pserv
-          name: finance
-          property: database
-      - key: DB_USERNAME
-        fromService:
-          type: pserv
-          name: finance
-          property: user
-      - key: DB_PASSWORD
-        fromService:
-          type: pserv
-          name: finance
-          property: password
-      - key: APP_KEY # <-- ASEGÚRATE DE PONER ESTO EN LAS VARIABLES DE ENTORNO EN RENDER
+          property: connectionString
+      - key: APP_KEY
         sync: false
 
-  # 2. La Base de Datos
   - type: pserv
     name: finance
-    runtime: postgres # <-- CORRECCIÓN
+    runtime: postgres
     plan: free
-
-  # 3. La Tarea Programada (Cron Job)
-  - type: cron
-    name: procesador-de-pagos
-    runtime: docker # <-- Usaremos Docker para el cron
-    plan: free
-    schedule: "0 5 * * *"
-    dockerfilePath: ./Dockerfile.cron # Apunta a un Dockerfile específico
-    dockerContext: .
-    startCommand: php artisan schedule:run
