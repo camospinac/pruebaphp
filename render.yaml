@@ -1,13 +1,6 @@
 services:
-  # Tu aplicación Laravel
   - type: web
     name: financepwa
     runtime: docker
     dockerfilePath: ./Dockerfile
-    plan: free
-
-  # Tu Base de Datos
-  - type: pserv
-    name: finance
-    runtime: postgres
     plan: free
