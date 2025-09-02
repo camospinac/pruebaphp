@@ -8,7 +8,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Subscription extends Model
 {
     use HasFactory;
-    protected $fillable = ['user_id', 'plan_id', 'initial_investment', 'status'];
+    protected $fillable = [
+        'user_id',
+        'plan_id',
+        'initial_investment',
+        'status',
+        'payment_receipt_path', // <-- ASEGÚRATE DE QUE ESTA LÍNEA ESTÉ ESCRITA EXACTAMENTE ASÍ
+    ];
 
     public function user() {
         return $this->belongsTo(User::class);

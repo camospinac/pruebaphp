@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\WithdrawalController;
+use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
+use App\Http\Controllers\Admin\WithdrawalController as AdminWithdrawalController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -47,6 +49,22 @@ Route::post('/subscriptions', [SubscriptionController::class, 'store'])
 Route::post('/withdrawals', [WithdrawalController::class, 'store'])
     ->middleware(['auth'])
     ->name('withdrawals.store');
+
+Route::middleware(['auth', 'is.admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Ruta para mostrar la lista de suscripciones pendientes
+    Route::get('/subscriptions/pending', [AdminSubscriptionController::class, 'pending'])
+        ->name('subscriptions.pending');
+
+    // Ruta para aprobar una suscripción
+    Route::patch('/subscriptions/{subscription}/approve', [AdminSubscriptionController::class, 'approve'])
+        ->name('subscriptions.approve');
+
+    Route::get('/withdrawals', [AdminWithdrawalController::class, 'index'])
+        ->name('withdrawals.index');
+
+    Route::patch('/withdrawals/{withdrawal}/complete', [AdminWithdrawalController::class, 'complete'])
+        ->name('withdrawals.complete');
+});
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
