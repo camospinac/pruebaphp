@@ -24,6 +24,14 @@ interface Plan {
     percentages: number[] | null;
 }
 
+interface Transaction {
+    id: string;
+    created_at: string;
+    tipo: 'abono' | 'retiro';
+    monto: number;
+    observacion: string;
+}
+
 interface Payment {
     id: number;
     amount: number;
@@ -47,18 +55,22 @@ const props = withDefaults(defineProps<{
     totalUtilidad?: number;
     totalGanancia?: number;
     totalAvailable?: number;
+    transactions?: Transaction[];
 }>(), {
     subscriptions: () => [],
     plans: () => [],
+    transactions: () => [],
     totalInversion: 0,
     totalUtilidad: 0,
     totalGanancia: 0,
     totalAvailable: 0,
 });
 
+// const activeTabSubscriptionId = ref<number | 'history' | null>('history');
+
 // --- ESTADO LOCAL ---
 const page = usePage();
-const activeTabSubscriptionId = ref<number | null>(props.subscriptions[0]?.id ?? null);
+const activeTabSubscriptionId = ref<number | 'history' | null>('history');
 const isInvestmentModalOpen = ref(false); // Renombrado para claridad
 const isWithdrawalModalOpen = ref(false);
 const generatedCode = ref<string | null>(null);
@@ -164,27 +176,68 @@ const formatCurrency = (amount: number) => {
      
             </div>
 
-            <div class="relative flex-1 rounded-xl border bg-card text-card-foreground p-6">
-                <div class="border-b mb-4">
-                    <nav class="-mb-px flex space-x-6 overflow-x-auto">
-                        <button v-for="sub in subscriptions" :key="sub.id" @click="activeTabSubscriptionId = sub.id"
-                            :class="[
-                                'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm',
-                                activeTabSubscriptionId === sub.id
-                                    ? 'border-primary text-primary'
-                                    : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-                            ]">
-                            {{ sub.plan.name }} #{{ sub.id }}
-                        </button>
-                    </nav>
+            <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-y-auto">
+        <div class="relative flex-1 rounded-xl border bg-card text-card-foreground p-6">
+            <div class="border-b mb-4">
+                <nav class="-mb-px flex space-x-6 overflow-x-auto">
+                    <button
+                        @click="activeTabSubscriptionId = 'history'"
+                        :class="[
+                            'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm',
+                            activeTabSubscriptionId === 'history'
+                                ? 'border-primary text-primary'
+                                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+                        ]"
+                    >
+                        Historial de Transacciones
+                    </button>
+                    
+                    <button v-for="sub in subscriptions" :key="sub.id" @click="activeTabSubscriptionId = sub.id"
+                        :class="[
+                            'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm',
+                            activeTabSubscriptionId === sub.id
+                                ? 'border-primary text-primary'
+                                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+                        ]">
+                        {{ sub.plan.name }} #{{ sub.id }}
+                    </button>
+                </nav>
+            </div>
+            
+            <div v-if="activeTabSubscriptionId === 'history'">
+                <div v-if="transactions.length === 0" class="flex items-center justify-center h-[40vh] text-muted-foreground">
+                    <p>Aún no tienes movimientos en tu historial.</p>
                 </div>
-                
-                <div v-if="!activeSubscription" class="flex items-center justify-center h-[40vh] text-muted-foreground">
-                    <p v-if="subscriptions.length > 0">Selecciona un plan para ver los detalles.</p>
-                    <p v-else>No tienes planes activos.</p>
-                </div>
-                
                 <div v-else class="overflow-x-auto">
+                    <table class="min-w-full text-sm text-left">
+                        <thead class="border-b">
+                            <tr>
+                                <th scope="col" class="px-4 py-3 font-medium">Fecha</th>
+                                <th scope="col" class="px-4 py-3 font-medium">Tipo</th>
+                                <th scope="col" class="px-4 py-3 font-medium text-right">Monto</th>
+                                <th scope="col" class="px-4 py-3 font-medium">Observación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="tx in transactions" :key="tx.id" class="border-b">
+                                <td class="px-4 py-3 text-muted-foreground whitespace-nowrap">{{ new Date(tx.created_at).toLocaleString('es-CO') }}</td>
+                                <td class="px-4 py-3">
+                                    <span class="font-semibold" :class="tx.tipo === 'abono' ? 'text-green-500' : 'text-red-500'">
+                                        {{ tx.tipo.charAt(0).toUpperCase() + tx.tipo.slice(1) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 font-mono text-right" :class="tx.tipo === 'abono' ? 'text-green-500' : 'text-red-500'">
+                                    {{ tx.tipo === 'abono' ? '+' : '-' }} {{ formatCurrency(tx.monto) }}
+                                </td>
+                                <td class="px-4 py-3 text-muted-foreground">{{ tx.observacion }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div v-else-if="activeSubscription">
+                <div class="overflow-x-auto">
                     <table class="min-w-full text-sm text-left">
                         <thead class="border-b">
                             <tr>
@@ -193,7 +246,8 @@ const formatCurrency = (amount: number) => {
                                 <th scope="col" class="px-4 py-3 font-medium text-center">Estado</th>
                                 <th scope="col" class="px-4 py-3 font-medium">Fecha de Pago</th>
                                 <th scope="col" class="px-4 py-3 font-medium">Tiempo Restante</th>
-                                <th scope="col" class="px-4 py-3 font-medium text-center">Acción</th> </tr>
+                                <th scope="col" class="px-4 py-3 font-medium text-center">Acción</th>
+                            </tr>
                         </thead>
                         <tbody>
                             <tr v-for="payment in activeSubscription.payments" :key="payment.id" class="border-b">
@@ -213,13 +267,21 @@ const formatCurrency = (amount: number) => {
                                 <td class="px-4 py-3 font-semibold" :class="getDaysRemaining(payment.payment_due_date).class">
                                     {{ getDaysRemaining(payment.payment_due_date).text }}
                                 </td>
-                                <td class="px-4 py-3 text-center"> <Button variant="outline" size="sm">Cobrar</Button>
+                                <td class="px-4 py-3 text-center">
+                                    <Button variant="outline" size="sm">Cobrar</Button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
+
+            <div v-else class="flex items-center justify-center h-[40vh] text-muted-foreground">
+                <p v-if="subscriptions.length > 0">Selecciona un plan para ver los detalles.</p>
+                <p v-else>No tienes planes activos.</p>
+            </div>
+        </div>
+        </div>
         </div>
 
         <Dialog :open="isInvestmentModalOpen" @update:open="isInvestmentModalOpen = false">

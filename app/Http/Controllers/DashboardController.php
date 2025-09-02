@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Carbon\Carbon; 
 use App\Models\Plan;
+use App\Models\Transaction;
 
 class DashboardController extends Controller
 {
@@ -32,6 +33,7 @@ class DashboardController extends Controller
             ->get();
 
         $plans = Plan::all(); 
+        $transactions = $user->transactions()->latest()->get();
 
 
         $allPayments = $activeSubscriptions->flatMap(function ($subscription) {
@@ -61,6 +63,7 @@ class DashboardController extends Controller
             'totalGanancia' => $totalGanancia,
             'plans' => $plans, 
             'totalAvailable' => $totalAvailable,
+            'transactions' => $transactions,
         ]);
     }
 }
