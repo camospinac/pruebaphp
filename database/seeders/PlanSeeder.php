@@ -24,11 +24,11 @@ class PlanSeeder extends Seeder
 
         Plan::create([
             'name' => 'Plan Premium',
-            'description' => 'Un plan avanzado con mayores beneficios.',
-            'image_url' => 'https://placehold.co/600x400/EAB308/FFF?text=Plan+Premium', // <-- Añade esto
-            'calculation_type' => 'percentage_based',
-            'fixed_percentage' => null,
-            'percentages' => [8, 12, 18, 22, 28, 35],
+            'description' => 'Paga tu inversión y utilidad en 6 cuotas iguales y fijas.',
+            'image_url' => 'https://placehold.co/600x400/EAB308/FFF?text=Plan+Premium',
+            'calculation_type' => 'equal_installments', // <-- TIPO DE CÁLCULO
+            'fixed_percentage' => 15.00,             // <-- PORCENTAJE FIJO
+            'percentages' => null,                   // <-- ESTO DEBE SER NULO
         ]);
     }
 }

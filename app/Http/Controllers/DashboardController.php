@@ -17,7 +17,7 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         if ($user->rol === 'admin') {
-            return redirect()->route('admin.users.index');
+            return redirect()->route('admin.dashboard');
         }
 
         $abonos = $user->transactions()->where('tipo', 'abono')->sum('monto');

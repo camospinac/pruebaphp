@@ -10,6 +10,7 @@ use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\WithdrawalController;
 use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
 use App\Http\Controllers\Admin\WithdrawalController as AdminWithdrawalController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -64,6 +65,9 @@ Route::middleware(['auth', 'is.admin'])->prefix('admin')->name('admin.')->group(
 
     Route::patch('/withdrawals/{withdrawal}/complete', [AdminWithdrawalController::class, 'complete'])
         ->name('withdrawals.complete');
+
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])
+         ->name('dashboard');
 });
 
 require __DIR__.'/settings.php';

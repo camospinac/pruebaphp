@@ -25,19 +25,30 @@ class SubscriptionController extends Controller
         $totalAvailable = $abonos - $retiros;
 
         // Lógica de validación (esto está perfecto)
+
         $request->validate([
-            'plan_id' => 'required|exists:plans,id',
-            'payment_method' => 'required|in:transfer,balance',
-            'receipt' => [Rule::requiredIf($request->payment_method === 'transfer'), 'image', 'max:2048'],
-            'amount' => [
-                'required', 'numeric', 'min:200000',
-                function ($attribute, $value, $fail) use ($request, $totalAvailable) {
-                    if ($request->payment_method === 'balance' && $value > $totalAvailable) {
-                        $fail('El monto a invertir no puede ser mayor a tu saldo disponible.');
-                    }
-                },
-            ],
-        ]);
+        'plan_id' => 'required|exists:plans,id',
+        'payment_method' => 'required|in:transfer,balance',
+
+        // Regla corregida para 'receipt'
+        'receipt' => [
+            Rule::requiredIf($request->payment_method === 'transfer'),
+            'nullable', // Permite que el campo sea nulo si no es requerido
+            'image',
+            'max:2048',
+        ],
+
+        'amount' => [
+            'required',
+            'numeric',
+            'min:200000',
+            function ($attribute, $value, $fail) use ($request, $totalAvailable) {
+                if ($request->payment_method === 'balance' && $value > $totalAvailable) {
+                    $fail('El monto no puede ser mayor a tu saldo disponible.');
+                }
+            },
+        ],
+    ]);
 
         $plan = Plan::findOrFail($request->plan_id);
 

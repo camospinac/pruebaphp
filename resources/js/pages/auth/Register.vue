@@ -7,8 +7,9 @@ import { Label } from '@/components/ui/label';
 import AuthBase from '@/layouts/AuthLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
+import { ref } from 'vue';
 
-
+const showReferralInput = ref(false);
 const form = useForm({
     nombres: '',
     apellidos: '',
@@ -16,6 +17,7 @@ const form = useForm({
     email: '',
     password: '',
     password_confirmation: '',
+    referral_code: '',
 });
 
 
@@ -66,6 +68,17 @@ const submit = () => {
                     <InputError :message="form.errors.email" />
                 </div>
 
+                <div class="flex items-center space-x-2">
+                    <input type="checkbox" id="has-referral" v-model="showReferralInput" />
+                    <Label for="has-referral" class="text-sm font-medium">¿Te invitó un amigo? Ingresa su código</Label>
+                </div>
+
+                <div v-if="showReferralInput" class="grid gap-2">
+                    <Label for="referral_code">Código de Referido</Label>
+                    <Input id="referral_code" type="text" v-model="form.referral_code" placeholder="EJEMPLO-123"
+                        autocomplete="off" />
+                    <InputError :message="form.errors.referral_code" />
+                </div>
 
                 <div class="grid gap-2">
                     <Label for="password">Contraseña</Label>

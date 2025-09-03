@@ -89,7 +89,7 @@ const calculatedPayments = computed(() => {
 
             for (let i = 1; i <= 5; i++) {
                 payments.push({
-                    label: `Cuota ${i}`,
+                    label: `Pago ${i}`,
                     value: fixedPayment,
                     date: dueDate.toISOString().split('T')[0]
                 });
@@ -99,25 +99,29 @@ const calculatedPayments = computed(() => {
             }
             const finalPayment = amount + fixedPayment;
             payments.push({
-                label: `Cuota Final`,
+                label: `Pago Final`,
                 value: finalPayment,
                 date: dueDate.toISOString().split('T')[0]
             });
         }
-    } else {
-        const percentages = selectedPlan.percentages || [];
-        for (let i = 0; i < percentages.length; i++) {
-            const p = percentages[i];
-            payments.push({
-                label: `Cuota ${i + 1} (${p}%)`,
-                value: amount * (p / 100),
-                date: dueDate.toISOString().split('T')[0]
-            });
-            // Sumamos 15 días y luego ajustamos a día hábil
-            dueDate.setDate(dueDate.getDate() + 15);
-            dueDate = getNextBusinessDay(dueDate); // <-- Lógica aplicada
+    } else if (selectedPlan.calculation_type === 'equal_installments') {
+        if (selectedPlan.fixed_percentage !== null) {
+            const fixedPayment = amount * (selectedPlan.fixed_percentage / 100);
+            const totalProfit = fixedPayment * 6;
+            const totalToPay = amount + totalProfit;
+            const installment = totalToPay / 6;
+
+            for (let i = 1; i <= 6; i++) {
+                payments.push({
+                    label: `Pago ${i} de 6`,
+                    value: installment,
+                    date: dueDate.toISOString().split('T')[0]
+                });
+                dueDate.setDate(dueDate.getDate() + 15);
+                dueDate = getNextBusinessDay(dueDate);
+            }
         }
-    }
+    } 
 
     return payments.map(p => ({
         ...p,

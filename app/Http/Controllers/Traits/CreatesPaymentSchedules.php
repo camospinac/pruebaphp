@@ -41,12 +41,17 @@ trait CreatesPaymentSchedules
                 'status' => 'pending',
                 'payment_due_date' => $currentDueDate->toDateString(),
             ]);
-        } else {
-            $percentages = $plan->percentages ?? [];
-            foreach ($percentages as $percentage) {
+        } elseif ($plan->calculation_type === 'equal_installments') {
+            $amount = $subscription->initial_investment;
+            $fixedPayment = $amount * ($plan->fixed_percentage / 100);
+            $totalProfit = $fixedPayment * 6;
+            $totalToPay = $amount + $totalProfit;
+            $installment = $totalToPay / 6;
+
+            for ($i = 1; $i <= 6; $i++) {
                 $subscription->payments()->create([
-                    'amount' => $subscription->initial_investment * ($percentage / 100),
-                    'percentage' => $percentage,
+                    'amount' => $installment,
+                    'percentage' => null, // No aplica un porcentaje por cuota
                     'status' => 'pending',
                     'payment_due_date' => $currentDueDate->toDateString(),
                 ]);
@@ -55,6 +60,6 @@ trait CreatesPaymentSchedules
                     $currentDueDate = $currentDueDate->nextBusinessDay();
                 }
             }
-        }
+        } 
     }
 }
