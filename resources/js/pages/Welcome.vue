@@ -86,6 +86,8 @@ onMounted(() => {
     <meta charset="utf-8">
     <title>Startup - Finance PWA</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
   </Head>
 
   <!-- <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">

@@ -6,6 +6,7 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
+use App\Models\Rank;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -35,16 +36,44 @@ class HandleInertiaRequests extends Middleware
      *
      * @return array<string, mixed>
      */
-    public function share(Request $request): array
+ public function share(Request $request): array
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
+
+        // --- INICIA LA LÓGICA AÑADIDA ---
+        $user = $request->user();
+        $nextRank = null;
+        $userWithRankData = null;
+
+        if ($user) {
+            // Buscamos el siguiente rango/objetivo del usuario
+            $nextRank = Rank::where('required_referrals', '>', $user->referral_count)
+                            ->orderBy('required_referrals', 'asc')
+                            ->first();
+
+            // Cargamos la relación del rango actual para que esté disponible
+            $user->load('rank');
+
+            // Creamos un array específico con los datos que la vista necesita
+            $userWithRankData = [
+                'id' => $user->id,
+                'nombres' => $user->nombres,
+                'email' => $user->email,
+                'rol' => $user->rol,
+                'rank' => $user->rank, // Su rango actual (objeto completo o null)
+                'referral_count' => $user->referral_count,
+                'next_rank' => $nextRank, // El siguiente objetivo (objeto completo o null)
+            ];
+        }
+        // --- FIN DE LA LÓGICA AÑADIDA ---
 
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user(),
+                // Reemplazamos el user() simple por nuestro array enriquecido
+                'user' => $userWithRankData,
             ],
             'ziggy' => [
                 ...(new Ziggy)->toArray(),
@@ -55,7 +84,6 @@ class HandleInertiaRequests extends Middleware
                 'error' => fn () => $request->session()->get('error'),
                 'withdrawal_code' => fn () => $request->session()->get('withdrawal_code'),
             ],
-
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

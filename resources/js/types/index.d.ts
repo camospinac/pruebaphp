@@ -5,6 +5,12 @@ export interface Auth {
     user: User;
 }
 
+export interface Rank {
+    id: number;
+    name: string;
+    
+}
+
 export interface BreadcrumbItem {
     title: string;
     href: string;
@@ -32,6 +38,12 @@ export interface User {
     celular: string;
     email: string;
     rol: 'admin' | 'usuario';
+    rank: Rank | null;
+    referral_count: number;
+    next_rank: {
+        name: string;
+        required_referrals: number;
+    } | null;
     // No incluimos password por seguridad
 }
 

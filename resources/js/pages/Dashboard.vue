@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { Head, useForm, usePage, Link  } from '@inertiajs/vue3';
+import { Head, useForm, usePage, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import PlanSelector from '@/components/PlanSelector.vue';
 import { type BreadcrumbItem } from '@/types';
@@ -74,6 +74,7 @@ const activeTabSubscriptionId = ref<number | 'history' | null>('history');
 const isInvestmentModalOpen = ref(false); // Renombrado para claridad
 const isWithdrawalModalOpen = ref(false);
 const generatedCode = ref<string | null>(null);
+const user = usePage().props.auth.user;
 
 const withdrawalForm = useForm({ // <-- Nuevo formulario para el retiro
     amount: '',
@@ -149,19 +150,41 @@ const formatCurrency = (amount: number) => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-y-auto">
+            <div v-if="user" class="p-6 rounded-xl border bg-card text-card-foreground">
+                <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
+                    <div class="flex-1">
+                        <h2 class="text-2xl font-bold tracking-tight">¡Hola de nuevo, {{ user.nombres }}!</h2>
+                        <div v-if="user.rank" class="flex items-center gap-1.5 mt-1">
+                            <span class="text-lg">🥉</span>
+                            <span class="font-semibold text-primary">{{ user.rank.name }}</span>
+                        </div>
+                        <p v-else class="text-sm text-muted-foreground">Aún no tienes un rango. ¡Invita a tus amigos!
+                        </p>
+                    </div>
 
-            <div v-if="subscriptions.length > 0" class="grid auto-rows-min gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <div v-if="user.next_rank" class="w-full md:w-1/3">
+                        <p class="text-sm font-medium text-muted-foreground mb-2 text-right">
+                            Progreso a: <span class="font-bold text-foreground">{{ user.next_rank.name }}</span>
+                        </p>
+                        <div class="w-full bg-muted rounded-full h-2.5">
+                            <div class="bg-primary h-2.5 rounded-full"
+                                :style="{ width: (user.referral_count / user.next_rank.required_referrals) * 100 + '%' }">
+                            </div>
+                        </div>
+                        <p class="text-xs text-muted-foreground mt-1 text-right">
+                            {{ user.referral_count }} / {{ user.next_rank.required_referrals }} referidos
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="subscriptions.length > 0" class="grid auto-rows-min gap-3 md:grid-cols-2 lg:grid-cols-3">
                 <div
                     class="relative flex flex-col justify-center p-6 aspect-video overflow-hidden rounded-xl border bg-card text-card-foreground">
                     <h3 class="text-sm font-medium text-muted-foreground">Inversión Total</h3>
                     <p class="mt-1 text-4xl font-semibold tracking-tight">{{ formatCurrency(totalInversion) }}</p>
                 </div>
-                <div
-                    class="relative flex flex-col justify-center p-6 aspect-video overflow-hidden rounded-xl border bg-card text-card-foreground">
-                    <h3 class="text-sm font-medium text-muted-foreground">Efectivo Disponible</h3>
-                    <p class="mt-1 text-4xl font-semibold tracking-tight text-teal-500">{{
-                        formatCurrency(totalAvailable) }}</p>
-                </div>
+
                 <div
                     class="relative flex flex-col justify-center p-6 aspect-video overflow-hidden rounded-xl border bg-card text-card-foreground">
                     <h3 class="text-sm font-medium text-muted-foreground">Utilidad Total</h3>
@@ -172,17 +195,17 @@ const formatCurrency = (amount: number) => {
                     class="relative flex flex-col justify-center p-6 aspect-video overflow-hidden rounded-xl border bg-card text-card-foreground">
                     <h3 class="text-sm font-medium text-muted-foreground">Ganancia Total</h3>
                     <p class="mt-1 text-4xl font-semibold tracking-tight text-blue-500">{{ formatCurrency(totalGanancia)
-                        }}</p>
+                    }}</p>
                 </div>
             </div>
 
-            <div class="flex justify-center py-4 space-x-4">
+            <!-- <div class="flex justify-center py-4 space-x-4">
                 <Button @click="isInvestmentModalOpen = true" size="lg">Quiero Invertir</Button>
                 <Button @click="isWithdrawalModalOpen = true" size="lg" variant="outline">Retirar Efectivo</Button>
                 <Link :href="route('referrals.index')">
                 <Button size="lg" variant="secondary">Mis Referidos</Button>
                 </Link>
-            </div>
+            </div> -->
 
             <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-y-auto">
                 <div class="relative flex-1 rounded-xl border bg-card text-card-foreground p-6">
@@ -255,7 +278,7 @@ const formatCurrency = (amount: number) => {
                                         <th scope="col" class="px-4 py-3 font-medium text-center">Estado</th>
                                         <th scope="col" class="px-4 py-3 font-medium">Fecha de Pago</th>
                                         <th scope="col" class="px-4 py-3 font-medium">Tiempo Restante</th>
-                                        <th scope="col" class="px-4 py-3 font-medium text-center">Acción</th>
+                                        
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -279,9 +302,6 @@ const formatCurrency = (amount: number) => {
                                             :class="getDaysRemaining(payment.payment_due_date).class">
                                             {{ getDaysRemaining(payment.payment_due_date).text }}
                                         </td>
-                                        <td class="px-4 py-3 text-center">
-                                            <Button variant="outline" size="sm">Cobrar</Button>
-                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -294,7 +314,26 @@ const formatCurrency = (amount: number) => {
                     </div>
                 </div>
             </div>
+
+            <div v-if="subscriptions.length > 0" class="grid md:grid-cols-3 gap-6 items-center">
+                <div
+                    class="md:col-span-1 p-6 rounded-xl border bg-card text-card-foreground h-full flex flex-col justify-center">
+                    <h3 class="text-sm font-medium text-muted-foreground">Efectivo Disponible</h3>
+                    <p class="mt-1 text-4xl font-semibold tracking-tight text-teal-500">{{
+                        formatCurrency(totalAvailable) }}</p>
+                </div>
+                <div class="md:col-span-2 flex flex-col md:flex-row justify-center items-center gap-4">
+                    <Button @click="isInvestmentModalOpen = true" size="lg" class="w-full md:w-auto">Quiero
+                        Invertir</Button>
+                    <Button @click="isWithdrawalModalOpen = true" size="lg" variant="outline"
+                        class="w-full md:w-auto">Retirar Efectivo</Button>
+                    <Link :href="route('referrals.index')" class="w-full md:w-auto">
+                    <Button size="lg" variant="secondary" class="w-full">Mis Referidos</Button>
+                    </Link>
+                </div>
+            </div>
         </div>
+
 
         <Dialog :open="isInvestmentModalOpen" @update:open="isInvestmentModalOpen = false">
             <DialogContent class="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">

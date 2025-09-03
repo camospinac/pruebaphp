@@ -85,57 +85,57 @@
 }
 
 :root {
-  /* Base */
-  --background: hsl(210 25% 98%); /* Fondo muy claro azulado */
-  --foreground: hsl(210 15% 15%); /* Texto principal gris oscuro con toque azul */
+  /* Base - Fondo cálido y texto carbón */
+  --background: hsl(39 20% 98%); /* Blanco hueso muy sutil */
+  --foreground: hsl(220 15% 20%); /* Gris carbón oscuro y profundo */
   
-  /* Tarjetas y popovers */
-  --card: hsl(210 25% 99%);
-  --card-foreground: hsl(210 15% 15%);
-  --popover: hsl(210 25% 99%);
-  --popover-foreground: hsl(210 15% 15%);
+  /* Tarjetas y popovers - Blanco puro para contraste */
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(220 15% 20%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(220 15% 20%);
 
-  /* Colores primarios */
-  --primary: hsl(210 60% 35%); /* Azul principal */
-  --primary-foreground: hsl(0 0% 100%); /* Texto blanco encima del primario */
+  /* Primario - El dorado como protagonista */
+  --primary: hsl(42 78% 48%); /* Dorado elegante, no muy amarillo */
+  --primary-foreground: hsl(220 15% 20%); /* Texto oscuro sobre el dorado para legibilidad */
 
-  /* Secundarios y acentos */
-  --secondary: hsl(210 30% 92%); /* Azul grisáceo muy suave */
-  --secondary-foreground: hsl(210 20% 20%);
-  --muted: hsl(210 25% 95%);
-  --muted-foreground: hsl(210 10% 45%);
-  --accent: hsl(210 30% 92%);
-  --accent-foreground: hsl(210 20% 20%);
+  /* Secundarios y Acentos - Una gama de grises cálidos */
+  --secondary: hsl(39 15% 94%); /* Gris claro con un toque cálido */
+  --secondary-foreground: hsl(220 15% 25%);
+  --muted: hsl(39 15% 96%);
+  --muted-foreground: hsl(220 8% 45%);
+  --accent: hsl(39 15% 92%);
+  --accent-foreground: hsl(220 15% 20%);
 
-  /* Estado destructivo (rojo suavizado para que combine) */
-  --destructive: hsl(0 65% 55%);
+  /* Destructivo - Un rojo más sobrio y corporativo */
+  --destructive: hsl(0 75% 50%);
   --destructive-foreground: hsl(0 0% 100%);
 
-  /* Bordes, inputs y ring */
-  --border: hsl(210 20% 90%);
-  --input: hsl(210 20% 88%);
-  --ring: hsl(210 60% 35%);
+  /* Bordes, inputs y ring - Unificando con la paleta */
+  --border: hsl(39 10% 88%);
+  --input: hsl(39 10% 90%);
+  --ring: hsl(42 78% 48%); /* El 'ring' de foco ahora es dorado */
 
-  /* Charts (armonizados con azul) */
-  --chart-1: hsl(210 60% 45%);
-  --chart-2: hsl(195 50% 40%);
-  --chart-3: hsl(220 40% 30%);
-  --chart-4: hsl(200 60% 55%);
-  --chart-5: hsl(190 50% 50%);
+  /* Charts - Una escala monocromática de grises y un acento dorado */
+  --chart-1: hsl(220 15% 30%);
+  --chart-2: hsl(220 12% 50%);
+  --chart-3: hsl(220 10% 70%);
+  --chart-4: hsl(42 78% 48%); /* El dorado como punto focal */
+  --chart-5: hsl(39 15% 90%);
 
-  /* Bordes redondeados */
+  /* Bordes redondeados (sin cambios) */
   --radius: 0.5rem;
 
-  /* Sidebar */
-  --sidebar-background: hsl(210 25% 97%);
-  --sidebar-foreground: hsl(210 15% 20%);
-  --sidebar-primary: hsl(210 60% 35%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(210 30% 92%);
-  --sidebar-accent-foreground: hsl(210 20% 25%);
-  --sidebar-border: hsl(210 20% 90%);
-  --sidebar-ring: hsl(210 60% 40%);
-  --sidebar: hsl(210 25% 97%);
+  /* Sidebar - Integrado con la nueva paleta */
+  --sidebar-background: hsl(0 0% 100%);
+  --sidebar-foreground: hsl(220 15% 25%);
+  --sidebar-primary: hsl(42 78% 48%);
+  --sidebar-primary-foreground: hsl(220 15% 20%);
+  --sidebar-accent: hsl(39 15% 94%);
+  --sidebar-accent-foreground: hsl(220 15% 20%);
+  --sidebar-border: hsl(39 10% 90%);
+  --sidebar-ring: hsl(42 78% 48%);
+  --sidebar: hsl(0 0% 100%);
 }
 
 
