@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { Head, useForm, usePage  } from '@inertiajs/vue3';
+import { Head, useForm, usePage, Link  } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import PlanSelector from '@/components/PlanSelector.vue';
 import { type BreadcrumbItem } from '@/types';
@@ -122,7 +122,7 @@ const activeSubscription = computed(() => {
 });
 
 // --- BREADCRUMBS Y HELPERS ---
-const breadcrumbs: BreadcrumbItem[] = [ { title: 'Dashboard', href: route('dashboard') } ];
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'Dashboard', href: route('dashboard') }];
 
 const getDaysRemaining = (dueDateString: string) => {
     const today = new Date();
@@ -144,144 +144,156 @@ const formatCurrency = (amount: number) => {
 </script>
 
 <template>
+
     <Head title="Dashboard" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-y-auto">
-            
+
             <div v-if="subscriptions.length > 0" class="grid auto-rows-min gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <div class="relative flex flex-col justify-center p-6 aspect-video overflow-hidden rounded-xl border bg-card text-card-foreground">
+                <div
+                    class="relative flex flex-col justify-center p-6 aspect-video overflow-hidden rounded-xl border bg-card text-card-foreground">
                     <h3 class="text-sm font-medium text-muted-foreground">Inversión Total</h3>
                     <p class="mt-1 text-4xl font-semibold tracking-tight">{{ formatCurrency(totalInversion) }}</p>
                 </div>
-                <div class="relative flex flex-col justify-center p-6 aspect-video overflow-hidden rounded-xl border bg-card text-card-foreground">
+                <div
+                    class="relative flex flex-col justify-center p-6 aspect-video overflow-hidden rounded-xl border bg-card text-card-foreground">
                     <h3 class="text-sm font-medium text-muted-foreground">Efectivo Disponible</h3>
-                    <p class="mt-1 text-4xl font-semibold tracking-tight text-teal-500">{{ formatCurrency(totalAvailable) }}</p>
+                    <p class="mt-1 text-4xl font-semibold tracking-tight text-teal-500">{{
+                        formatCurrency(totalAvailable) }}</p>
                 </div>
-                <div class="relative flex flex-col justify-center p-6 aspect-video overflow-hidden rounded-xl border bg-card text-card-foreground">
+                <div
+                    class="relative flex flex-col justify-center p-6 aspect-video overflow-hidden rounded-xl border bg-card text-card-foreground">
                     <h3 class="text-sm font-medium text-muted-foreground">Utilidad Total</h3>
-                    <p class="mt-1 text-4xl font-semibold tracking-tight text-green-500">+ {{ formatCurrency(totalUtilidad) }}</p>
+                    <p class="mt-1 text-4xl font-semibold tracking-tight text-green-500">+ {{
+                        formatCurrency(totalUtilidad) }}</p>
                 </div>
-                <div class="relative flex flex-col justify-center p-6 aspect-video overflow-hidden rounded-xl border bg-card text-card-foreground">
+                <div
+                    class="relative flex flex-col justify-center p-6 aspect-video overflow-hidden rounded-xl border bg-card text-card-foreground">
                     <h3 class="text-sm font-medium text-muted-foreground">Ganancia Total</h3>
-                    <p class="mt-1 text-4xl font-semibold tracking-tight text-blue-500">{{ formatCurrency(totalGanancia) }}</p>
+                    <p class="mt-1 text-4xl font-semibold tracking-tight text-blue-500">{{ formatCurrency(totalGanancia)
+                        }}</p>
                 </div>
             </div>
 
             <div class="flex justify-center py-4 space-x-4">
                 <Button @click="isInvestmentModalOpen = true" size="lg">Quiero Invertir</Button>
-                <Button @click="isWithdrawalModalOpen = true" size="lg" variant="outline">
-                    Retirar Efectivo
-                </Button>
-     
+                <Button @click="isWithdrawalModalOpen = true" size="lg" variant="outline">Retirar Efectivo</Button>
+                <Link :href="route('referrals.index')">
+                <Button size="lg" variant="secondary">Mis Referidos</Button>
+                </Link>
             </div>
 
             <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-y-auto">
-        <div class="relative flex-1 rounded-xl border bg-card text-card-foreground p-6">
-            <div class="border-b mb-4">
-                <nav class="-mb-px flex space-x-6 overflow-x-auto">
-                    <button
-                        @click="activeTabSubscriptionId = 'history'"
-                        :class="[
-                            'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm',
-                            activeTabSubscriptionId === 'history'
-                                ? 'border-primary text-primary'
-                                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-                        ]"
-                    >
-                        Historial de Transacciones
-                    </button>
-                    
-                    <button v-for="sub in subscriptions" :key="sub.id" @click="activeTabSubscriptionId = sub.id"
-                        :class="[
-                            'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm',
-                            activeTabSubscriptionId === sub.id
-                                ? 'border-primary text-primary'
-                                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-                        ]">
-                        {{ sub.plan.name }} #{{ sub.id }}
-                    </button>
-                </nav>
-            </div>
-            
-            <div v-if="activeTabSubscriptionId === 'history'">
-                <div v-if="transactions.length === 0" class="flex items-center justify-center h-[40vh] text-muted-foreground">
-                    <p>Aún no tienes movimientos en tu historial.</p>
-                </div>
-                <div v-else class="overflow-x-auto">
-                    <table class="min-w-full text-sm text-left">
-                        <thead class="border-b">
-                            <tr>
-                                <th scope="col" class="px-4 py-3 font-medium">Fecha</th>
-                                <th scope="col" class="px-4 py-3 font-medium">Tipo</th>
-                                <th scope="col" class="px-4 py-3 font-medium text-right">Monto</th>
-                                <th scope="col" class="px-4 py-3 font-medium">Observación</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="tx in transactions" :key="tx.id" class="border-b">
-                                <td class="px-4 py-3 text-muted-foreground whitespace-nowrap">{{ new Date(tx.created_at).toLocaleString('es-CO') }}</td>
-                                <td class="px-4 py-3">
-                                    <span class="font-semibold" :class="tx.tipo === 'abono' ? 'text-green-500' : 'text-red-500'">
-                                        {{ tx.tipo.charAt(0).toUpperCase() + tx.tipo.slice(1) }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3 font-mono text-right" :class="tx.tipo === 'abono' ? 'text-green-500' : 'text-red-500'">
-                                    {{ tx.tipo === 'abono' ? '+' : '-' }} {{ formatCurrency(tx.monto) }}
-                                </td>
-                                <td class="px-4 py-3 text-muted-foreground">{{ tx.observacion }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <div v-else-if="activeSubscription">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm text-left">
-                        <thead class="border-b">
-                            <tr>
-                                <th scope="col" class="px-4 py-3 font-medium"># Pago</th>
-                                <th scope="col" class="px-4 py-3 font-medium text-right">Monto</th>
-                                <th scope="col" class="px-4 py-3 font-medium text-center">Estado</th>
-                                <th scope="col" class="px-4 py-3 font-medium">Fecha de Pago</th>
-                                <th scope="col" class="px-4 py-3 font-medium">Tiempo Restante</th>
-                                <th scope="col" class="px-4 py-3 font-medium text-center">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="payment in activeSubscription.payments" :key="payment.id" class="border-b">
-                                <td class="px-4 py-3 font-medium text-muted-foreground">{{ payment.id }}</td>
-                                <td class="px-4 py-3 font-mono text-right">{{ formatCurrency(payment.amount) }}</td>
-                                <td class="px-4 py-3 text-center">
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full" :class="{
-                                        'bg-yellow-100 text-yellow-800': payment.status === 'pending',
-                                        'bg-green-100 text-green-800': payment.status === 'paid',
-                                        'bg-blue-100 text-blue-800': payment.status === 'accredited',
-                                        'bg-purple-100 text-purple-800': payment.status === 'reinvested',
-                                    }">
-                                        {{ payment.status.charAt(0).toUpperCase() + payment.status.slice(1) }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3 text-muted-foreground">{{ payment.payment_due_date }}</td>
-                                <td class="px-4 py-3 font-semibold" :class="getDaysRemaining(payment.payment_due_date).class">
-                                    {{ getDaysRemaining(payment.payment_due_date).text }}
-                                </td>
-                                <td class="px-4 py-3 text-center">
-                                    <Button variant="outline" size="sm">Cobrar</Button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                <div class="relative flex-1 rounded-xl border bg-card text-card-foreground p-6">
+                    <div class="border-b mb-4">
+                        <nav class="-mb-px flex space-x-6 overflow-x-auto">
+                            <button @click="activeTabSubscriptionId = 'history'" :class="[
+                                'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm',
+                                activeTabSubscriptionId === 'history'
+                                    ? 'border-primary text-primary'
+                                    : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+                            ]">
+                                Historial de Transacciones
+                            </button>
 
-            <div v-else class="flex items-center justify-center h-[40vh] text-muted-foreground">
-                <p v-if="subscriptions.length > 0">Selecciona un plan para ver los detalles.</p>
-                <p v-else>No tienes planes activos.</p>
+                            <button v-for="sub in subscriptions" :key="sub.id" @click="activeTabSubscriptionId = sub.id"
+                                :class="[
+                                    'whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm',
+                                    activeTabSubscriptionId === sub.id
+                                        ? 'border-primary text-primary'
+                                        : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+                                ]">
+                                {{ sub.plan.name }} #{{ sub.id }}
+                            </button>
+                        </nav>
+                    </div>
+
+                    <div v-if="activeTabSubscriptionId === 'history'">
+                        <div v-if="transactions.length === 0"
+                            class="flex items-center justify-center h-[40vh] text-muted-foreground">
+                            <p>Aún no tienes movimientos en tu historial.</p>
+                        </div>
+                        <div v-else class="overflow-x-auto">
+                            <table class="min-w-full text-sm text-left">
+                                <thead class="border-b">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-3 font-medium">Fecha</th>
+                                        <th scope="col" class="px-4 py-3 font-medium">Tipo</th>
+                                        <th scope="col" class="px-4 py-3 font-medium text-right">Monto</th>
+                                        <th scope="col" class="px-4 py-3 font-medium">Observación</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="tx in transactions" :key="tx.id" class="border-b">
+                                        <td class="px-4 py-3 text-muted-foreground whitespace-nowrap">{{ new
+                                            Date(tx.created_at).toLocaleString('es-CO') }}</td>
+                                        <td class="px-4 py-3">
+                                            <span class="font-semibold"
+                                                :class="tx.tipo === 'abono' ? 'text-green-500' : 'text-red-500'">
+                                                {{ tx.tipo.charAt(0).toUpperCase() + tx.tipo.slice(1) }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 font-mono text-right"
+                                            :class="tx.tipo === 'abono' ? 'text-green-500' : 'text-red-500'">
+                                            {{ tx.tipo === 'abono' ? '+' : '-' }} {{ formatCurrency(tx.monto) }}
+                                        </td>
+                                        <td class="px-4 py-3 text-muted-foreground">{{ tx.observacion }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div v-else-if="activeSubscription">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-sm text-left">
+                                <thead class="border-b">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-3 font-medium"># Pago</th>
+                                        <th scope="col" class="px-4 py-3 font-medium text-right">Monto</th>
+                                        <th scope="col" class="px-4 py-3 font-medium text-center">Estado</th>
+                                        <th scope="col" class="px-4 py-3 font-medium">Fecha de Pago</th>
+                                        <th scope="col" class="px-4 py-3 font-medium">Tiempo Restante</th>
+                                        <th scope="col" class="px-4 py-3 font-medium text-center">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="payment in activeSubscription.payments" :key="payment.id"
+                                        class="border-b">
+                                        <td class="px-4 py-3 font-medium text-muted-foreground">{{ payment.id }}</td>
+                                        <td class="px-4 py-3 font-mono text-right">{{ formatCurrency(payment.amount) }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            <span class="px-2 py-1 text-xs font-semibold rounded-full" :class="{
+                                                'bg-yellow-100 text-yellow-800': payment.status === 'pending',
+                                                'bg-green-100 text-green-800': payment.status === 'paid',
+                                                'bg-blue-100 text-blue-800': payment.status === 'accredited',
+                                                'bg-purple-100 text-purple-800': payment.status === 'reinvested',
+                                            }">
+                                                {{ payment.status.charAt(0).toUpperCase() + payment.status.slice(1) }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-muted-foreground">{{ payment.payment_due_date }}</td>
+                                        <td class="px-4 py-3 font-semibold"
+                                            :class="getDaysRemaining(payment.payment_due_date).class">
+                                            {{ getDaysRemaining(payment.payment_due_date).text }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            <Button variant="outline" size="sm">Cobrar</Button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div v-else class="flex items-center justify-center h-[40vh] text-muted-foreground">
+                        <p v-if="subscriptions.length > 0">Selecciona un plan para ver los detalles.</p>
+                        <p v-else>No tienes planes activos.</p>
+                    </div>
+                </div>
             </div>
-        </div>
-        </div>
         </div>
 
         <Dialog :open="isInvestmentModalOpen" @update:open="isInvestmentModalOpen = false">
@@ -292,63 +304,54 @@ const formatCurrency = (amount: number) => {
                         Selecciona un plan y define cómo quieres realizar el pago.
                     </DialogDescription>
                 </DialogHeader>
-                <PlanSelector 
-                    :plans="plans" 
-                    :total-available="totalAvailable"
-                    @submit="handleNewSubscription" 
-                />
+                <PlanSelector :plans="plans" :total-available="totalAvailable" @submit="handleNewSubscription" />
             </DialogContent>
         </Dialog>
 
-<Dialog :open="isWithdrawalModalOpen" @update:open="closeWithdrawalModal">
-    <DialogContent class="sm:max-w-[425px]">
-        <div v-if="!generatedCode">
-            <DialogHeader>
-                <DialogTitle>Solicitar Retiro de Efectivo</DialogTitle>
-                <DialogDescription>
-                    Ingresa el monto que deseas retirar. Se generará un código único.
-                </DialogDescription>
-            </DialogHeader>
-            <form @submit.prevent="handleWithdrawalSubmit" class="grid gap-4 py-4">
-                <div class="grid gap-2">
-                    <Label for="withdrawal-amount">Monto a Retirar</Label>
-                    <Input 
-                        id="withdrawal-amount" 
-                        type="number" 
-                        :value="withdrawalForm.amount"
-                        @input="withdrawalForm.amount = $event.target.value"
-                        required
-                    />
-                    <p class="text-sm text-muted-foreground">
-                        Disponible: {{ formatCurrency(totalAvailable) }}
-                    </p>
-                    <InputError :message="withdrawalForm.errors.amount" />
+        <Dialog :open="isWithdrawalModalOpen" @update:open="closeWithdrawalModal">
+            <DialogContent class="sm:max-w-[425px]">
+                <div v-if="!generatedCode">
+                    <DialogHeader>
+                        <DialogTitle>Solicitar Retiro de Efectivo</DialogTitle>
+                        <DialogDescription>
+                            Ingresa el monto que deseas retirar. Se generará un código único.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form @submit.prevent="handleWithdrawalSubmit" class="grid gap-4 py-4">
+                        <div class="grid gap-2">
+                            <Label for="withdrawal-amount">Monto a Retirar</Label>
+                            <Input id="withdrawal-amount" type="number" :value="withdrawalForm.amount"
+                                @input="withdrawalForm.amount = $event.target.value" required />
+                            <p class="text-sm text-muted-foreground">
+                                Disponible: {{ formatCurrency(totalAvailable) }}
+                            </p>
+                            <InputError :message="withdrawalForm.errors.amount" />
+                        </div>
+                        <Button type="submit" :disabled="withdrawalForm.processing">
+                            Generar Código de Retiro
+                        </Button>
+                    </form>
                 </div>
-                <Button type="submit" :disabled="withdrawalForm.processing">
-                    Generar Código de Retiro
-                </Button>
-            </form>
-        </div>
 
-        <div v-else class="text-center py-4">
-            <DialogHeader>
-                <DialogTitle class="text-2xl">¡Código Generado con Éxito!</DialogTitle>
-            </DialogHeader>
-            <div class="my-6">
-                <p class="text-sm text-muted-foreground">Tu código único de retiro es:</p>
-                <p class="text-5xl font-bold tracking-widest bg-muted rounded-lg py-3 my-2">
-                    {{ generatedCode }}
-                </p>
-            </div>
-            <p class="text-sm text-muted-foreground">
-                Toma una captura o anota este código y comunícate con un asesor para continuar con tu retiro.
-            </p>
-            <Button @click="closeWithdrawalModal" class="mt-6 w-full">
-                Finalizar
-            </Button>
-        </div>
+                <div v-else class="text-center py-4">
+                    <DialogHeader>
+                        <DialogTitle class="text-2xl">¡Código Generado con Éxito!</DialogTitle>
+                    </DialogHeader>
+                    <div class="my-6">
+                        <p class="text-sm text-muted-foreground">Tu código único de retiro es:</p>
+                        <p class="text-5xl font-bold tracking-widest bg-muted rounded-lg py-3 my-2">
+                            {{ generatedCode }}
+                        </p>
+                    </div>
+                    <p class="text-sm text-muted-foreground">
+                        Toma una captura o anota este código y comunícate con un asesor para continuar con tu retiro.
+                    </p>
+                    <Button @click="closeWithdrawalModal" class="mt-6 w-full">
+                        Finalizar
+                    </Button>
+                </div>
 
-        </DialogContent>
-</Dialog>
+            </DialogContent>
+        </Dialog>
     </AppLayout>
 </template>

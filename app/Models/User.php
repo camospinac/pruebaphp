@@ -25,6 +25,8 @@ class User extends Authenticatable
         'email',
         'password',
         'rol',
+        'referral_code',
+        'referred_by_id',
     ];
 
     /**
@@ -74,5 +76,15 @@ class User extends Authenticatable
     public function subscriptions()
     {
         return $this->hasMany(Subscription::class);
+    }
+    public function rank()
+    {
+        return $this->belongsTo(Rank::class);
+    }
+
+    // Para obtener la lista de usuarios que este ha referido
+    public function referrals()
+    {
+        return $this->hasMany(User::class, 'referred_by_id');
     }
 }

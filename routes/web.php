@@ -11,6 +11,7 @@ use App\Http\Controllers\WithdrawalController;
 use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
 use App\Http\Controllers\Admin\WithdrawalController as AdminWithdrawalController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\ReferralController; 
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -25,6 +26,10 @@ Route::get('/dashboard', [DashboardController::class, 'show'], function () {
 })
     ->middleware(['auth']) // <--- SOLO DEJA 'auth'
     ->name('dashboard');
+
+Route::get('/my-referrals', [ReferralController::class, 'index'])
+    ->middleware(['auth']) // Protegida para usuarios logueados y verificados
+    ->name('referrals.index');
 
 // Grupo de rutas para el ADMIN
 // Protegido por 'auth' y por nuestro middleware 'is.admin'
