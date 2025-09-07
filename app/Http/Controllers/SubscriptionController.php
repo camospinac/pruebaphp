@@ -29,6 +29,7 @@ class SubscriptionController extends Controller
         $request->validate([
         'plan_id' => 'required|exists:plans,id',
         'payment_method' => 'required|in:transfer,balance',
+        'investment_contract_type' => 'required|in:abierta,cerrada',
 
         // Regla corregida para 'receipt'
         'receipt' => [
@@ -78,6 +79,7 @@ class SubscriptionController extends Controller
                 'initial_investment' => $request->amount,
                 'status' => $status,
                 'payment_receipt_path' => $receiptPath,
+                'contract_type' => $request->investment_contract_type,
             ]);
 
             // 3. ¡AQUÍ ESTÁ LA MAGIA!

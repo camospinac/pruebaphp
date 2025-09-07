@@ -54,7 +54,7 @@
         
 
         <!-- Template Stylesheet -->
-        <link href="/css/style.css" rel="stylesheet">
+        
 
         @routes
         @vite(['resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])

@@ -60,9 +60,10 @@ class HandleInertiaRequests extends Middleware
                 'nombres' => $user->nombres,
                 'email' => $user->email,
                 'rol' => $user->rol,
-                'rank' => $user->rank, // Su rango actual (objeto completo o null)
+                'referral_code' => $user->referral_code,
+                'rank' => $user->rank,
                 'referral_count' => $user->referral_count,
-                'next_rank' => $nextRank, // El siguiente objetivo (objeto completo o null)
+                'next_rank' => $nextRank,
             ];
         }
         // --- FIN DE LA LÓGICA AÑADIDA ---

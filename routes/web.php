@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionContro
 use App\Http\Controllers\Admin\WithdrawalController as AdminWithdrawalController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\ReferralController; 
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -73,6 +74,18 @@ Route::middleware(['auth', 'is.admin'])->prefix('admin')->name('admin.')->group(
 
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])
          ->name('dashboard');
+    Route::get('/reports/subscriptions', [AdminReportController::class, 'subscriptions'])
+        ->name('reports.subscriptions');
+    Route::get('/reports/payments', [AdminReportController::class, 'payments'])
+        ->name('reports.payments');
+    Route::get('/reports/withdrawals', [AdminReportController::class, 'withdrawals'])
+        ->name('reports.withdrawals');
+    Route::get('/reports/subscriptions/export', [AdminReportController::class, 'exportSubscriptions'])
+        ->name('reports.subscriptions.export');
+    Route::get('/reports/payments/export', [AdminReportController::class, 'exportPayments'])
+        ->name('reports.payments.export');
+    Route::get('/reports/withdrawals/export', [AdminReportController::class, 'exportWithdrawals'])
+        ->name('reports.withdrawals.export');
 });
 
 require __DIR__.'/settings.php';

@@ -36,6 +36,7 @@ export interface User {
     nombres: string;
     apellidos: string;
     celular: string;
+    referral_code: string | null;
     email: string;
     rol: 'admin' | 'usuario';
     rank: Rank | null;

@@ -39,12 +39,14 @@ interface Payment {
     payment_due_date: string;
 }
 
+
 interface Subscription {
     id: number;
     initial_investment: number;
     status: string;
     plan: Plan;
     payments: Payment[];
+    contract_type: 'abierta' | 'cerrada';
 }
 
 // --- PROPS ---
@@ -142,6 +144,14 @@ const formatCurrency = (amount: number) => {
         style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0,
     }).format(amount);
 };
+
+const copyToClipboard = () => {
+    if (user?.referral_code) {
+        navigator.clipboard.writeText(user.referral_code).then(() => {
+            alert('¡Código copiado al portapapeles!');
+        });
+    }
+};
 </script>
 
 <template>
@@ -150,33 +160,47 @@ const formatCurrency = (amount: number) => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-y-auto">
-            <div v-if="user" class="p-6 rounded-xl border bg-card text-card-foreground">
-                <div class="flex flex-col md:flex-row items-start md:items-center gap-4">
-                    <div class="flex-1">
-                        <h2 class="text-2xl font-bold tracking-tight">¡Hola de nuevo, {{ user.nombres }}!</h2>
-                        <div v-if="user.rank" class="flex items-center gap-1.5 mt-1">
-                            <span class="text-lg">🥉</span>
-                            <span class="font-semibold text-primary">{{ user.rank.name }}</span>
-                        </div>
-                        <p v-else class="text-sm text-muted-foreground">Aún no tienes un rango. ¡Invita a tus amigos!
-                        </p>
-                    </div>
-
-                    <div v-if="user.next_rank" class="w-full md:w-1/3">
-                        <p class="text-sm font-medium text-muted-foreground mb-2 text-right">
-                            Progreso a: <span class="font-bold text-foreground">{{ user.next_rank.name }}</span>
-                        </p>
-                        <div class="w-full bg-muted rounded-full h-2.5">
-                            <div class="bg-primary h-2.5 rounded-full"
-                                :style="{ width: (user.referral_count / user.next_rank.required_referrals) * 100 + '%' }">
-                            </div>
-                        </div>
-                        <p class="text-xs text-muted-foreground mt-1 text-right">
-                            {{ user.referral_count }} / {{ user.next_rank.required_referrals }} referidos
-                        </p>
-                    </div>
+<div v-if="user" class="p-6 rounded-xl border bg-card text-card-foreground">
+    <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
+        
+        <div class="flex-1 space-y-4">
+            <div class="space-y-1">
+                <h2 class="text-2xl font-bold tracking-tight">¡Hola de nuevo, {{ user.nombres }}!</h2>
+                <div v-if="user.rank" class="flex items-center gap-2">
+                    <span class="text-lg">🥉</span>
+                    <span class="font-semibold text-primary text-base">{{ user.rank.name }}</span>
+                </div>
+                <p v-else class="text-sm text-muted-foreground">Aún no tienes un rango. ¡Invita a tus amigos!</p>
+            </div>
+            
+            <div v-if="user.referral_code" class="flex items-center gap-3 pt-2">
+                <p class="text-sm font-medium text-muted-foreground">Tu código para invitar:</p>
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted border cursor-pointer hover:bg-secondary" @click="copyToClipboard" title="Copiar código">
+                    <span class="font-mono font-bold text-primary">{{ user.referral_code }}</span>
+                    <button>
+                        <Copy class="h-4 w-4 text-muted-foreground" />
+                    </button>
                 </div>
             </div>
+        </div>
+
+        <div v-if="user.next_rank" class="w-full md:w-1/3 space-y-2">
+            <div class="flex justify-between items-center">
+                <p class="text-sm font-medium text-muted-foreground">Progreso a:</p>
+                <p class="text-sm font-bold text-foreground">{{ user.next_rank.name }}</p>
+            </div>
+            <div class="w-full bg-muted rounded-full h-2.5">
+                <div class="bg-primary h-2.5 rounded-full" 
+                     :style="{ width: (user.referral_count / user.next_rank.required_referrals) * 100 + '%' }">
+                </div>
+            </div>
+            <p class="text-xs text-muted-foreground text-right">
+                {{ user.referral_count }} / {{ user.next_rank.required_referrals }} referidos
+            </p>
+        </div>
+        
+    </div>
+</div>
 
             <div v-if="subscriptions.length > 0" class="grid auto-rows-min gap-3 md:grid-cols-2 lg:grid-cols-3">
                 <div
@@ -268,44 +292,43 @@ const formatCurrency = (amount: number) => {
                         </div>
                     </div>
 
-                    <div v-else-if="activeSubscription">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full text-sm text-left">
-                                <thead class="border-b">
-                                    <tr>
-                                        <th scope="col" class="px-4 py-3 font-medium"># Pago</th>
-                                        <th scope="col" class="px-4 py-3 font-medium text-right">Monto</th>
-                                        <th scope="col" class="px-4 py-3 font-medium text-center">Estado</th>
-                                        <th scope="col" class="px-4 py-3 font-medium">Fecha de Pago</th>
-                                        <th scope="col" class="px-4 py-3 font-medium">Tiempo Restante</th>
-                                        
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="payment in activeSubscription.payments" :key="payment.id"
-                                        class="border-b">
-                                        <td class="px-4 py-3 font-medium text-muted-foreground">{{ payment.id }}</td>
-                                        <td class="px-4 py-3 font-mono text-right">{{ formatCurrency(payment.amount) }}
-                                        </td>
-                                        <td class="px-4 py-3 text-center">
-                                            <span class="px-2 py-1 text-xs font-semibold rounded-full" :class="{
-                                                'bg-yellow-100 text-yellow-800': payment.status === 'pending',
-                                                'bg-green-100 text-green-800': payment.status === 'paid',
-                                                'bg-blue-100 text-blue-800': payment.status === 'accredited',
-                                                'bg-purple-100 text-purple-800': payment.status === 'reinvested',
-                                            }">
-                                                {{ payment.status.charAt(0).toUpperCase() + payment.status.slice(1) }}
-                                            </span>
-                                        </td>
-                                        <td class="px-4 py-3 text-muted-foreground">{{ payment.payment_due_date }}</td>
-                                        <td class="px-4 py-3 font-semibold"
-                                            :class="getDaysRemaining(payment.payment_due_date).class">
-                                            {{ getDaysRemaining(payment.payment_due_date).text }}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    <div v-else-if="activeSubscription" class="overflow-x-auto">
+                        <table class="min-w-full text-sm text-left">
+                            <thead class="border-b">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3 font-medium"># Pago</th>
+                                    <th scope="col" class="px-4 py-3 font-medium">Tipo Contrato</th>
+                                    <th scope="col" class="px-4 py-3 font-medium text-right">Monto</th>
+                                    <th scope="col" class="px-4 py-3 font-medium text-center">Estado</th>
+                                    <th scope="col" class="px-4 py-3 font-medium">Fecha de Pago</th>
+                                    <th scope="col" class="px-4 py-3 font-medium">Tiempo Restante</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="payment in activeSubscription.payments" :key="payment.id" class="border-b">
+                                    <td class="px-4 py-3 font-medium text-muted-foreground">{{ payment.id }}</td>
+
+                                    <td class="px-4 py-3 capitalize font-medium">
+                                        {{ activeSubscription.contract_type }}
+                                    </td>
+
+                                    <td class="px-4 py-3 font-mono text-right">{{ formatCurrency(payment.amount) }}</td>
+                                    <td class="px-4 py-3 text-center">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full" :class="{
+                                            'bg-yellow-100 text-yellow-800': payment.status === 'pending',
+                                            // ...tus otras clases de estado
+                                        }">
+                                            {{ payment.status.charAt(0).toUpperCase() + payment.status.slice(1) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3 text-muted-foreground">{{ payment.payment_due_date }}</td>
+                                    <td class="px-4 py-3 font-semibold"
+                                        :class="getDaysRemaining(payment.payment_due_date).class">
+                                        {{ getDaysRemaining(payment.payment_due_date).text }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
 
                     <div v-else class="flex items-center justify-center h-[40vh] text-muted-foreground">

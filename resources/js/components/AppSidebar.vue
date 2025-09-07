@@ -6,7 +6,15 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { type NavItem } from '@/types';
 // 👇 Importa el helper `usePage` y los nuevos iconos
 import { Head, Link, usePage } from '@inertiajs/vue3';
-import { LayoutGrid, Users, ArrowLeftRight } from 'lucide-vue-next'; // <-- Nuevos iconos
+import { 
+    LayoutGrid, 
+    Users, 
+    ArrowLeftRight, 
+    FileText, 
+    Wallet, 
+    CheckCircle 
+} from 'lucide-vue-next';
+
 import AppLogo from './AppLogo.vue';
 
 // 1. Obtenemos los datos de la página, que incluyen al usuario autenticado
@@ -24,22 +32,48 @@ const mainNavItems: NavItem[] = [
 ];
 
 // 3. Si el usuario es admin, añadimos los enlaces de administración
-if (user.rol === 'admin') {
-    mainNavItems.push(
+if (user && user.rol === 'admin') {
+    mainNavItems.splice(0, mainNavItems.length,
         {
-            title: 'Usuarios',
-            href: route('admin.users.index'),
-            icon: Users,
-            //active: route().current('admin.users.index'),
+            title: 'Dashboard',
+            href: route('admin.dashboard'),
+            icon: LayoutGrid,
         },
         {
-            title: 'Transacciones',
-            href: route('admin.transactions.index'),
-            icon: ArrowLeftRight,
-            //active: route().current('admin.transactions.index'),
+            title: 'Aprobar Suscripciones',
+            href: route('admin.subscriptions.pending'),
+            icon: CheckCircle,
+        },
+        {
+            title: 'Gestionar Retiros',
+            href: route('admin.withdrawals.index'),
+            icon: Wallet,
+        },
+        // --- INICIA EL BLOQUE AÑADIDO ---
+        {
+            title: 'Reporte Suscripciones',
+            href: route('admin.reports.subscriptions'),
+            icon: FileText,
+        },
+        {
+            title: 'Reporte Pagos',
+            href: route('admin.reports.payments'),
+            icon: FileText,
+        },
+        {
+            title: 'Reporte Retiros',
+            href: route('admin.reports.withdrawals'),
+            icon: FileText,
+        },
+        // --- FIN DEL BLOQUE AÑADIDO ---
+        {
+            title: 'Gestionar Usuarios',
+            href: route('admin.users.index'), // Cambia a la ruta correcta
+            icon: Users,
         }
     );
 }
+
 
 const footerNavItems: NavItem[] = [];
 </script>

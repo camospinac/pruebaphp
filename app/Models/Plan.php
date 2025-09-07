@@ -23,6 +23,8 @@ class Plan extends Model
         'calculation_type',
         'fixed_percentage',
         'percentages',
+        'closed_profit_percentage',
+        'closed_duration_days',
     ];
 
     /**

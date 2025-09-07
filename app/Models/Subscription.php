@@ -13,7 +13,8 @@ class Subscription extends Model
         'plan_id',
         'initial_investment',
         'status',
-        'payment_receipt_path', // <-- ASEGÚRATE DE QUE ESTA LÍNEA ESTÉ ESCRITA EXACTAMENTE ASÍ
+        'payment_receipt_path',
+        'contract_type',
     ];
 
     public function user() {

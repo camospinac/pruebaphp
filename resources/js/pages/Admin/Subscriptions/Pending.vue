@@ -77,6 +77,7 @@ const formatDate = (dateString: string) => {
                         <tr>
                             <th scope="col" class="px-4 py-3 font-medium">Usuario</th>
                             <th scope="col" class="px-4 py-3 font-medium">Plan</th>
+                            <th scope="col" class="px-4 py-3 font-medium">Tipo Contrato</th> 
                             <th scope="col" class="px-4 py-3 font-medium text-right">Monto</th>
                             <th scope="col" class="px-4 py-3 font-medium">Fecha Solicitud</th>
                             <th scope="col" class="px-4 py-3 font-medium text-center">Comprobante</th>
@@ -87,6 +88,7 @@ const formatDate = (dateString: string) => {
                         <tr v-for="sub in subscriptions" :key="sub.id" class="border-b">
                             <td class="px-4 py-3 font-medium">{{ sub.user.nombres }} {{ sub.user.apellidos }}</td>
                             <td class="px-4 py-3 text-muted-foreground">{{ sub.plan.name }}</td>
+                            <td class="px-4 py-3 font-semibold capitalize"> {{ sub.contract_type }}</td>
                             <td class="px-4 py-3 font-mono text-right">{{ formatCurrency(sub.initial_investment) }}</td>
                             <td class="px-4 py-3 text-muted-foreground">{{ formatDate(sub.created_at) }}</td>
                             <td class="px-4 py-3 text-center">

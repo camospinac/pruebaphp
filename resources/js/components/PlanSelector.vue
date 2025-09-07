@@ -1,127 +1,119 @@
 <script setup lang="ts">
-
-import { computed } from 'vue';
-import { Head, useForm } from '@inertiajs/vue3';
-import AppLayout from '@/layouts/AppLayout.vue';
-import AuthBase from '@/layouts/AuthLayout.vue';
-import { type BreadcrumbItem } from '@/types';
+import { computed, watch } from 'vue';
+import { useForm } from '@inertiajs/vue3';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+
 import { LoaderCircle } from 'lucide-vue-next';
-import { watch } from 'vue';
 import Holidays from 'date-holidays';
 
 const hd = new Holidays('CO');
 
 // --- INTERFACES Y PROPS ---
-// 1. Actualizamos la 'interface' para que conozca la nueva propiedad de imagen.
 interface Plan {
     id: number;
     name: string;
     description: string;
-    image_url: string | null; // <-- Propiedad nueva
+    image_url: string | null;
+    investment_type: 'abierta' | 'cerrada';
     calculation_type: string;
     fixed_percentage: number | null;
+    closed_profit_percentage: number | null;
+    closed_duration_days: number | null;
     percentages: number[] | null;
 }
-
 const props = defineProps<{
     plans: Plan[];
     totalAvailable: number;
 }>();
 
-// --- BREADCRUMBS ---
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Selección de Plan',
-        href: route('plan.selection'),
-    },
-];
-
 const emit = defineEmits(['submit']);
 
-// --- FORMULARIO Y ESTADO ---
-// 2. El plan_id ahora empieza como nulo, porque el usuario debe seleccionar una tarjeta.
+// --- FORMULARIO ---
 const form = useForm({
     plan_id: null as number | null,
     amount: '',
     receipt: null as File | null,
-    payment_method: 'transfer'
+    payment_method: 'transfer',
+    investment_contract_type: 'abierta', // <-- Campo nuevo añadido
 });
 
+// --- WATCHERS ---
 watch(() => form.payment_method, (newMethod) => {
     if (newMethod === 'balance') {
         form.receipt = null;
     }
 });
+watch(() => form.amount, (newValue) => {
+    // ... tu lógica de corrección de monto
+});
 
-// --- LÓGICA DE CÁLCULO (SIN CAMBIOS) ---
-// Esta lógica ya funciona perfectamente con el nuevo diseño.
+// --- LÓGICA DE CÁLCULO ---
 const calculatedPayments = computed(() => {
     if (!form.amount || !form.plan_id) return [];
-
     const amount = parseFloat(form.amount);
     if (isNaN(amount) || amount <= 0) return [];
-
     const selectedPlan = props.plans.find(p => p.id === form.plan_id);
     if (!selectedPlan) return [];
 
     const payments = [];
+    
+    // Si el contrato es CERRADO, se ejecuta esta lógica
+    if (form.investment_contract_type === 'cerrada') {
 
-    // 3. Nueva función auxiliar para encontrar el próximo día hábil
-    const getNextBusinessDay = (date: Date): Date => {
-        let currentDate = new Date(date);
-        // Mientras sea fin de semana (0=Domingo, 6=Sábado) o sea festivo...
-        while (currentDate.getDay() === 0 || currentDate.getDay() === 6 || hd.isHoliday(currentDate)) {
-            // ...le sumamos un día y volvemos a comprobar.
-            currentDate.setDate(currentDate.getDate() + 1);
-        }
-        return currentDate;
-    };
+        
+           const percentage = selectedPlan.closed_profit_percentage ?? 40;
+    const duration = selectedPlan.closed_duration_days ?? 90;
 
-    // 4. Nos aseguramos de que la PRIMERA fecha de pago también sea un día hábil
-    let dueDate = getNextBusinessDay(new Date());
+    // --- FÓRMULA CORREGIDA ---
+    const baseProfit = amount * (percentage / 100);
+    const totalProfit = baseProfit * 6; // Se multiplica por 6
+    const totalPayment = amount + totalProfit; // Se suma el total de la utilidad
+    // --- FIN DE LA FÓRMULA ---
 
-    if (selectedPlan.calculation_type === 'fixed_plus_final') {
-        if (selectedPlan.fixed_percentage !== null) {
+    let finalDate = new Date();
+    finalDate.setDate(finalDate.getDate() + duration);
+
+    payments.push({
+        label: `Pago Único a ${duration} días`,
+        value: totalPayment,
+        date: finalDate.toISOString().split('T')[0]
+    });
+    } 
+    // Si es ABIERTO, se ejecuta esta otra lógica
+    else {
+        const getNextBusinessDay = (date: Date): Date => {
+            let currentDate = new Date(date);
+            while (currentDate.getDay() === 0 || currentDate.getDay() === 6 || hd.isHoliday(currentDate)) {
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            return currentDate;
+        };
+        let dueDate = getNextBusinessDay(new Date());
+
+        if (selectedPlan.calculation_type === 'fixed_plus_final' && selectedPlan.fixed_percentage) {
             const fixedPayment = amount * (selectedPlan.fixed_percentage / 100);
-
             for (let i = 1; i <= 5; i++) {
-                payments.push({
-                    label: `Pago ${i}`,
-                    value: fixedPayment,
-                    date: dueDate.toISOString().split('T')[0]
-                });
-                // Sumamos 15 días y luego ajustamos a día hábil
+                payments.push({ label: `Pago ${i}`, value: fixedPayment, date: dueDate.toISOString().split('T')[0] });
                 dueDate.setDate(dueDate.getDate() + 15);
-                dueDate = getNextBusinessDay(dueDate); // <-- Lógica aplicada
+                dueDate = getNextBusinessDay(dueDate);
             }
             const finalPayment = amount + fixedPayment;
-            payments.push({
-                label: `Pago Final`,
-                value: finalPayment,
-                date: dueDate.toISOString().split('T')[0]
-            });
+            payments.push({ label: `Pago Final`, value: finalPayment, date: dueDate.toISOString().split('T')[0] });
         }
-    } else if (selectedPlan.calculation_type === 'equal_installments') {
-        if (selectedPlan.fixed_percentage !== null) {
+        else if (selectedPlan.calculation_type === 'equal_installments' && selectedPlan.fixed_percentage) {
             const fixedPayment = amount * (selectedPlan.fixed_percentage / 100);
             const totalProfit = fixedPayment * 6;
             const totalToPay = amount + totalProfit;
             const installment = totalToPay / 6;
-
             for (let i = 1; i <= 6; i++) {
-                payments.push({
-                    label: `Pago ${i} de 6`,
-                    value: installment,
-                    date: dueDate.toISOString().split('T')[0]
-                });
+                payments.push({ label: `Pago ${i} de 6`, value: installment, date: dueDate.toISOString().split('T')[0] });
                 dueDate.setDate(dueDate.getDate() + 15);
                 dueDate = getNextBusinessDay(dueDate);
             }
         }
-    } 
+    }
 
     return payments.map(p => ({
         ...p,
@@ -131,44 +123,10 @@ const calculatedPayments = computed(() => {
     }));
 });
 
-// --- FUNCIÓN DE ENVÍO (SIN CAMBIOS) ---
+// --- FUNCIÓN DE ENVÍO ---
 const handleSubmit = () => {
     emit('submit', form);
 };
-
-watch(() => form.amount, (newValue) => {
-    // 1. Convertimos el valor (que puede ser un string) a número.
-    const numValue = parseFloat(newValue);
-
-    // 2. Si el campo está vacío o no es un número válido, salimos.
-    if (newValue === '' || isNaN(numValue)) {
-        return;
-    }
-
-    const min = 200000;
-    const max = 5000000;
-    const step = 100000;
-    let correctedValue = numValue;
-
-    // Redondeamos al múltiplo de 100.000 más cercano
-    correctedValue = Math.round(numValue / step) * step;
-
-    // Corregimos si es menor que el mínimo
-    if (correctedValue < min) {
-        correctedValue = min;
-    }
-
-    // Corregimos si es mayor que el máximo
-    if (correctedValue > max) {
-        correctedValue = max;
-    }
-
-    // Actualizamos el valor solo si es diferente
-    // 3. Lo convertimos de nuevo a string para asignarlo al formulario.
-    if (String(correctedValue) !== newValue) {
-        form.amount = String(correctedValue);
-    }
-});
 </script>
 
 <template>
@@ -204,6 +162,19 @@ watch(() => form.amount, (newValue) => {
             </div>
 
             <div class="grid gap-2">
+                <Label>Tipo de Contrato</Label>
+                <div class="flex items-center space-x-4 rounded-md border p-2 bg-background">
+                    <label class="flex items-center space-x-2 cursor-pointer p-2 rounded-md flex-1 justify-center transition-colors" :class="{'bg-muted': form.investment_contract_type === 'abierta'}">
+                        <input type="radio" v-model="form.investment_contract_type" value="abierta" class="sr-only" />
+                        <span>Contrato Abierto</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer p-2 rounded-md flex-1 justify-center transition-colors" :class="{'bg-muted': form.investment_contract_type === 'cerrada'}">
+                        <input type="radio" v-model="form.investment_contract_type" value="cerrada" class="sr-only" />
+                        <span>Contrato Cerrado</span>
+                    </label>
+                </div>
+            </div>
+            <div class="grid gap-2">
                 <Label for="amount">Monto Base</Label>
                 <Input 
                     id="amount" 
@@ -231,7 +202,7 @@ watch(() => form.amount, (newValue) => {
                     </label>
                 </div>
                 <p v-if="form.payment_method === 'balance'" class="text-sm text-muted-foreground">
-                    Saldo disponible: {{ totalAvailable }}
+                    Saldo disponible: {{ formatCurrency(totalAvailable) }}
                 </p>
                 <InputError :message="form.errors.payment_method" />
             </div>

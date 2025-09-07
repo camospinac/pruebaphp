@@ -33,7 +33,8 @@ class PlanController extends Controller
         $request->validate([
             'plan_id' => 'required|exists:plans,id',
             'amount' => 'required|numeric|min:200000',
-            'receipt' => 'required|image|max:2048', // Obligatorio para usuarios nuevos
+            'receipt' => 'required|image|max:2048',
+            'investment_contract_type' => 'required|in:abierta,cerrada',
         ]);
 
         /** @var \App\Models\User $user */
@@ -53,6 +54,7 @@ class PlanController extends Controller
                 'initial_investment' => $request->amount,
                 'status' => 'pending_verification',
                 'payment_receipt_path' => $receiptPath,
+                'contract_type' => $request->investment_contract_type,
             ]);
 
             // 4. Llamamos a nuestro "ayudante" para crear los 6 pagos.

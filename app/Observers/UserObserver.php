@@ -5,45 +5,66 @@ namespace App\Observers;
 use App\Models\User;
 use App\Models\Rank;
 use App\Models\Transaction;
+use Illuminate\Support\Facades\Log; // Optional: for logging/debugging
 
 class UserObserver
 {
     /**
-     * Se ejecuta DESPUÉS de que un usuario ha sido creado.
+     * Handle the User "created" event.
      */
     public function created(User $user): void
     {
-        // Si el usuario no fue referido por nadie, no hacemos nada.
+        // 1. Si el nuevo usuario no fue referido, no hacemos nada.
         if (! $user->referred_by_id) {
             return;
         }
 
-        // Buscamos al usuario que lo refirió (el "padrino")
+        // 2. Buscamos al "padrino" (el referidor)
         $referrer = User::find($user->referred_by_id);
 
         if ($referrer) {
-            // Incrementamos su contador de referidos en 1
+            // 3. Obtenemos el rango actual del padrino (antes de subir el contador)
+            $previousRank = $referrer->rank;
+            $previousRankReferrals = $previousRank->required_referrals ?? 0;
+
+            // 4. Incrementamos su contador de referidos
             $referrer->increment('referral_count');
-
-            // Obtenemos el nuevo total de referidos
             $newCount = $referrer->referral_count;
+            
+            // 5. Buscamos el nuevo rango que acaba de alcanzar
+            $newRank = Rank::where('required_referrals', $newCount)
+                           ->where('is_active', true)
+                           ->first();
 
-            // Buscamos si existe un nuevo rango que coincida con el nuevo total de referidos
-            $newRank = Rank::where('required_referrals', $newCount)->where('is_active', true)->first();
-
-            // ¡Premio! Si se encontró un nuevo rango...
+            // 6. ¡Premio! Si se encontró un nuevo rango...
             if ($newRank) {
-                // 1. Le asignamos el nuevo rango al padrino
-                $referrer->rank_id = $newRank->id;
-                $referrer->save();
+                // 7. Calculamos el "tramo" de referidos para esta recompensa
+                $referralsForReward = $referrer->referrals() // 'referrals' es la relación que definimos
+                    ->with(['subscriptions' => fn($q) => $q->orderBy('created_at', 'asc')->limit(1)])
+                    ->skip($previousRankReferrals)
+                    ->take($newRank->required_referrals - $previousRankReferrals)
+                    ->get();
+                
+                // 8. Sumamos la inversión de ese tramo de referidos
+                $investmentSum = $referralsForReward->sum(function ($ref) {
+                    return $ref->subscriptions->first()->initial_investment ?? 0;
+                });
 
-                // 2. Creamos la transacción de 'abono' como recompensa
-                Transaction::create([
-                    'id_user' => $referrer->id,
-                    'tipo' => 'abono',
-                    'monto' => $newRank->reward_amount,
-                    'observacion' => "Recompensa por alcanzar el rango: {$newRank->name}",
-                ]);
+                // 9. Calculamos el monto de la recompensa
+                $rewardAmount = $investmentSum * ($newRank->reward_percentage / 100);
+
+                // 10. Actualizamos el rango del padrino y creamos la transacción de abono
+                if ($rewardAmount > 0) {
+                    $referrer->rank_id = $newRank->id;
+                    $referrer->save();
+
+                    Transaction::create([
+                        'id_user' => $referrer->id,
+                        'tipo' => 'abono',
+                        'monto' => $rewardAmount,
+                        'observacion' => "Recompensa por alcanzar el rango: {$newRank->name}",
+                    ]);
+                }
             }
         }
     }
