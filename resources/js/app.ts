@@ -6,6 +6,7 @@ import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
 import { initializeTheme } from './composables/useAppearance';
+import '@vueform/multiselect/themes/default.css';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 

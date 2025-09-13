@@ -38,7 +38,7 @@ class DashboardController extends Controller
             // Si el contrato es CERRADO, usamos el porcentaje para cerrados (40%)
             if ($sub->contract_type === 'cerrada' && $sub->plan->closed_profit_percentage) {
                 $baseProfit = $sub->initial_investment * ($sub->plan->closed_profit_percentage / 100);
-                $totalUtilidad += $baseProfit * 6; // La fórmula que definimos
+                $totalUtilidad += $baseProfit * 3; // La fórmula que definimos
             } 
             // Si el contrato es ABIERTO, usamos el porcentaje para abiertos (15%)
             elseif ($sub->contract_type === 'abierta' && $sub->plan->fixed_percentage) {

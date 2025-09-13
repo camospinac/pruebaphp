@@ -21,7 +21,7 @@ class PlanSeeder extends Seeder
             'calculation_type' => 'fixed_plus_final',
             'fixed_percentage' => 15.00,
             'percentages' => null,
-            'closed_profit_percentage' => 40.00, // <-- Nuevo campo
+            'closed_profit_percentage' => 50.00, // <-- Nuevo campo
             'closed_duration_days' => 90,
         ]);
 
@@ -33,7 +33,7 @@ class PlanSeeder extends Seeder
             'calculation_type' => 'equal_installments', // <-- TIPO DE CÁLCULO
             'fixed_percentage' => 15.00,             // <-- PORCENTAJE FIJO
             'percentages' => null,                   // <-- ESTO DEBE SER NULO
-            'closed_profit_percentage' => 40.00, // <-- Nuevo campo
+            'closed_profit_percentage' => 50.00, // <-- Nuevo campo
             'closed_duration_days' => 90,
         ]);
     }

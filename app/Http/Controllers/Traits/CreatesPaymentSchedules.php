@@ -11,18 +11,18 @@ trait CreatesPaymentSchedules
     protected function createPaymentSchedule(Subscription $subscription)
     {
         $plan = $subscription->plan;
+        $amount = $subscription->initial_investment;
+        $totalProfit = 0;
 
+        // --- LÓGICA PRINCIPAL BASADA EN EL TIPO DE CONTRATO ---
         if ($subscription->contract_type === 'cerrada') {
-
-            // LÓGICA UNIVERSAL PARA CONTRATO CERRADO
-            $amount = $subscription->initial_investment;
-            $profitPercentage = $plan->closed_profit_percentage ?? 40;
-            $durationDays = $plan->closed_duration_days ?? 90;
-            // --- INICIA LA NUEVA FÓRMULA ---
-            $baseProfit = $amount * ($profitPercentage / 100);
-            $totalProfit = $baseProfit * 6;
-            $totalPayment = $amount + $totalProfit;
             
+            $profitPercentage = $plan->closed_profit_percentage ?? 50;
+            $durationDays = $plan->closed_duration_days ?? 90;
+
+            $baseProfit = $amount * ($profitPercentage / 100);
+            $totalProfit = $baseProfit * 3;
+            $totalPayment = $amount + $totalProfit;
             $dueDate = Carbon::now()->addDays($durationDays);
 
             $subscription->payments()->create([
@@ -31,31 +31,20 @@ trait CreatesPaymentSchedules
                 'status' => 'pending',
                 'payment_due_date' => $dueDate->toDateString(),
             ]);
-        } else {
 
+        } else { // 'abierta'
+            
             BusinessDay::enable('Carbon\Carbon', 'es_CO');
             $currentDueDate = Carbon::now();
             if (!$currentDueDate->isBusinessDay()) {
                 $currentDueDate = $currentDueDate->nextBusinessDay();
             }
 
-
-            if ($plan->calculation_type === 'lump_sum') {
-                $amount = $subscription->initial_investment;
-                $profit = $amount * ($plan->fixed_percentage / 100);
-                $totalPayment = $amount + $profit;
-                $dueDate = Carbon::now()->addDays(90); // 90 días calendario
-
-                $subscription->payments()->create([
-                    'amount' => $totalPayment,
-                    'percentage' => $plan->fixed_percentage,
-                    'status' => 'pending',
-                    'payment_due_date' => $dueDate->toDateString(),
-                ]);
-            } elseif ($plan->calculation_type === 'fixed_plus_final') {
-                $amount = $subscription->initial_investment;
+            if ($plan->calculation_type === 'fixed_plus_final' && $plan->fixed_percentage) {
                 $fixedPayment = $amount * ($plan->fixed_percentage / 100);
-
+                $totalProfit = $fixedPayment * 6;
+                
+                // --- INICIA EL CÓDIGO QUE FALTABA ---
                 for ($i = 1; $i <= 5; $i++) {
                     $subscription->payments()->create([
                         'amount' => $fixedPayment,
@@ -64,9 +53,7 @@ trait CreatesPaymentSchedules
                         'payment_due_date' => $currentDueDate->toDateString(),
                     ]);
                     $currentDueDate->addDays(15);
-                    if (!$currentDueDate->isBusinessDay()) {
-                        $currentDueDate = $currentDueDate->nextBusinessDay();
-                    }
+                    if (!$currentDueDate->isBusinessDay()) { $currentDueDate = $currentDueDate->nextBusinessDay(); }
                 }
                 $finalPayment = $amount + $fixedPayment;
                 $subscription->payments()->create([
@@ -75,8 +62,9 @@ trait CreatesPaymentSchedules
                     'status' => 'pending',
                     'payment_due_date' => $currentDueDate->toDateString(),
                 ]);
-            } elseif ($plan->calculation_type === 'equal_installments') {
-                $amount = $subscription->initial_investment;
+                // --- FIN DEL CÓDIGO QUE FALTABA ---
+
+            } elseif ($plan->calculation_type === 'equal_installments' && $plan->fixed_percentage) {
                 $fixedPayment = $amount * ($plan->fixed_percentage / 100);
                 $totalProfit = $fixedPayment * 6;
                 $totalToPay = $amount + $totalProfit;
@@ -85,16 +73,18 @@ trait CreatesPaymentSchedules
                 for ($i = 1; $i <= 6; $i++) {
                     $subscription->payments()->create([
                         'amount' => $installment,
-                        'percentage' => null, // No aplica un porcentaje por cuota
+                        'percentage' => null,
                         'status' => 'pending',
                         'payment_due_date' => $currentDueDate->toDateString(),
                     ]);
                     $currentDueDate->addDays(15);
-                    if (!$currentDueDate->isBusinessDay()) {
-                        $currentDueDate = $currentDueDate->nextBusinessDay();
-                    }
+                    if (!$currentDueDate->isBusinessDay()) { $currentDueDate = $currentDueDate->nextBusinessDay(); }
                 }
             }
         }
+
+        // Guardamos la ganancia calculada en la suscripción
+        $subscription->profit_amount = $totalProfit;
+        $subscription->save();
     }
 }

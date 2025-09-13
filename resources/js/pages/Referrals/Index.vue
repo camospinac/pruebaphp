@@ -51,7 +51,7 @@ const formatDate = (dateString: string) => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="p-4 md:p-6 rounded-xl border bg-card text-card-foreground">
-            <h3 class="text-xl font-semibold mb-4">Usuarios que Has Invitado</h3>
+            <h3 class="text-xl font-semibold mb-4">Mis Referidos</h3>
             
             <div v-if="referrals.length === 0" class="flex items-center justify-center h-[40vh] text-muted-foreground">
                 <div class="text-center">

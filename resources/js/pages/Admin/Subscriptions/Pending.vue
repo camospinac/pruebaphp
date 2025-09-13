@@ -9,6 +9,7 @@ interface User {
     id: string;
     nombres: string;
     apellidos: string;
+    identification_number: string;
 }
 
 interface Plan {
@@ -22,8 +23,10 @@ interface Subscription {
     status: string;
     created_at: string;
     payment_receipt_path: string;
+    contract_type: 'abierta' | 'cerrada';
     user: User;
     plan: Plan;
+    profit_amount: number;
 }
 
 // --- PROPS ---
@@ -76,9 +79,11 @@ const formatDate = (dateString: string) => {
                     <thead class="border-b">
                         <tr>
                             <th scope="col" class="px-4 py-3 font-medium">Usuario</th>
+                            <th class="px-4 py-3 font-medium"># Documento</th>
                             <th scope="col" class="px-4 py-3 font-medium">Plan</th>
                             <th scope="col" class="px-4 py-3 font-medium">Tipo Contrato</th> 
                             <th scope="col" class="px-4 py-3 font-medium text-right">Monto</th>
+                            <th class="px-4 py-3 font-medium text-right">Ganancia Esperada</th>
                             <th scope="col" class="px-4 py-3 font-medium">Fecha Solicitud</th>
                             <th scope="col" class="px-4 py-3 font-medium text-center">Comprobante</th>
                             <th scope="col" class="px-4 py-3 font-medium text-center">Acción</th>
@@ -87,9 +92,11 @@ const formatDate = (dateString: string) => {
                     <tbody>
                         <tr v-for="sub in subscriptions" :key="sub.id" class="border-b">
                             <td class="px-4 py-3 font-medium">{{ sub.user.nombres }} {{ sub.user.apellidos }}</td>
+                            <td class="px-4 py-3 text-muted-foreground">{{ sub.user.identification_number }}</td>
                             <td class="px-4 py-3 text-muted-foreground">{{ sub.plan.name }}</td>
                             <td class="px-4 py-3 font-semibold capitalize"> {{ sub.contract_type }}</td>
                             <td class="px-4 py-3 font-mono text-right">{{ formatCurrency(sub.initial_investment) }}</td>
+                            <td class="px-4 py-3 font-mono text-right text-green-600">+{{ formatCurrency(sub.profit_amount) }}</td>
                             <td class="px-4 py-3 text-muted-foreground">{{ formatDate(sub.created_at) }}</td>
                             <td class="px-4 py-3 text-center">
                                 <a :href="`/storage/${sub.payment_receipt_path}`" target="_blank" class="text-primary underline hover:text-primary/80">

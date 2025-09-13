@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Holidays from 'date-holidays';
+import { PlusCircle, MinusCircle } from 'lucide-vue-next';
 import {
     Dialog,
     DialogContent,
@@ -28,7 +29,21 @@ interface Plan {
     closed_profit_percentage: number | null;
     closed_duration_days: number | null;
 }
+
 const props = defineProps<{ plans: Plan[] }>();
+
+const formatCurrency = (amount: number | string) => {
+    const number = Number(amount);
+    if (isNaN(number)) return '';
+    return new Intl.NumberFormat('es-CO', {
+        style: 'currency', currency: 'COP', minimumFractionDigits: 0
+    }).format(number);
+};
+
+const formattedAmount = computed(() => {
+    if (form.amount === '') return '';
+    return formatCurrency(form.amount);
+});
 
 // --- ESTADO ---
 const isModalOpen = ref(false);
@@ -72,14 +87,23 @@ const calculatedPayments = computed(() => {
     };
 
     if (form.investment_contract_type === 'cerrada') {
-        const percentage = selectedPlan.closed_profit_percentage ?? 40;
-        const duration = selectedPlan.closed_duration_days ?? 90;
+        // --- INICIA LA DEPURACIÓN ---
+        console.clear(); // Limpia la consola para ver solo este cálculo
+        console.log("--- MODO CERRADO ACTIVADO ---");
 
-        // --- INICIA LA NUEVA FÓRMULA ---
+        const percentage = selectedPlan.closed_profit_percentage ?? 50;
+        const duration = selectedPlan.closed_duration_days ?? 90;
+        console.log(`Monto de entrada: ${amount}, Porcentaje a usar: ${percentage}`);
+
         const baseProfit = amount * (percentage / 100);
-        const totalProfit = baseProfit * 6;
+        console.log(`Ganancia Base (Monto * %): ${baseProfit}`);
+
+        const totalProfit = baseProfit * 3;
+        console.log(`Ganancia Total (Ganancia Base * 3): ${totalProfit}`);
+
         const totalPayment = amount + totalProfit;
-        // --- FIN DE LA NUEVA FÓRMULA ---
+        console.log(`==> PAGO FINAL CALCULADO: ${totalPayment}`);
+        // --- FIN DE LA DEPURACIÓN ---
 
         let finalDate = new Date();
         finalDate.setDate(finalDate.getDate() + duration);
@@ -112,26 +136,55 @@ const calculatedPayments = computed(() => {
 
 // --- FUNCIÓN DE ENVÍO Y WATCH ---
 const submit = () => { form.post(route('plan.store'), { onSuccess: () => closeModal() }); };
-watch(() => form.amount, (newValue) => {
-    if (newValue === '' || isNaN(parseFloat(newValue))) return;
-    const numValue = parseFloat(newValue);
-    const min = 200000, max = 5000000, step = 100000;
-    let correctedValue = Math.round(numValue / step) * step;
-    if (correctedValue < min) correctedValue = min;
-    if (correctedValue > max) correctedValue = max;
-    if (String(correctedValue) !== newValue) {
-        form.amount = String(correctedValue);
+// watch(() => form.amount, (newValue) => {
+//     if (newValue === '' || isNaN(parseFloat(newValue))) return;
+//     const numValue = parseFloat(newValue);
+//     const min = 200000, max = 5000000, step = 100000;
+//     let correctedValue = Math.round(numValue / step) * step;
+//     if (correctedValue < min) correctedValue = min;
+//     if (correctedValue > max) correctedValue = max;
+//     if (String(correctedValue) !== newValue) {
+//         form.amount = String(correctedValue);
+//     }
+// });
+
+const increaseAmount = () => {
+    const min = 200000;
+    const max = 5000000;
+    const step = 100000;
+
+    let currentValue = parseFloat(form.amount) || 0;
+
+    if (currentValue < min) {
+        currentValue = min;
+    } else if (currentValue < max) {
+        currentValue += step;
     }
-});
+
+    form.amount = String(currentValue);
+};
+
+const decreaseAmount = () => {
+    const min = 200000;
+    const step = 100000;
+
+    let currentValue = parseFloat(form.amount);
+
+    if (currentValue > min) {
+        currentValue -= step;
+    }
+
+    form.amount = String(currentValue);
+};
 </script>
 
 <template>
 
     <Head title="Seleccionar Plan" />
-    <AppLayout :breadcrumbs="breadcrumbs">
+    <AppLayout>
         <AuthBase title="Selecciona tu Plan" description="Elige uno de nuestros planes para empezar."
             :show-logo="false">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                 <div v-for="plan in plans" :key="plan.id" @click="openPlanModal(plan)"
                     class="rounded-xl border bg-card text-card-foreground shadow transition-all duration-200 cursor-pointer hover:ring-2 hover:ring-primary">
                     <img :src="plan.image_url ?? 'https://placehold.co/600x400/gray/white?text=Plan'"
@@ -146,40 +199,107 @@ watch(() => form.amount, (newValue) => {
                 <DialogContent class="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle class="text-2xl">{{ selectedPlanForModal?.name }}</DialogTitle>
-                        <DialogDescription>{{ selectedPlanForModal?.description }}</DialogDescription>
+                        <DialogDescription class="text-base">{{ selectedPlanForModal?.description }}</DialogDescription>
                     </DialogHeader>
                     <form @submit.prevent="submit" class="flex flex-col gap-6 pt-4">
+                        <div class="relative">
+        <!-- <div class="absolute inset-0 flex items-center">
+            <span class="w-full border-t"></span>
+        </div> -->
+        <div class="relative flex justify-center text-xs uppercase">
+            <Label>¿No sabes qué contrato escoger?</Label>
+            <!-- <span class="bg-card px-2 text-muted-foreground"></span> -->
+        </div>
+    </div>
+
+    <details class="group border rounded-lg overflow-hidden">
+        <summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-muted">
+            <div class="flex items-center gap-3">
+                <span class="text-xl">🕊️</span>
+                <h4 class="font-semibold">Contrato Abierto</h4>
+            </div>
+            <span class="transition-transform duration-300 group-open:rotate-180">▼</span>
+        </summary>
+        <div class="p-4 border-t text-sm text-muted-foreground space-y-3">
+            <p><strong>Mayor control, liquidez y libertad.</strong></p>
+            <p>Ideal para quienes desean controlar de cerca sus ingresos y mantener flexibilidad a lo largo del tiempo.</p>
+            <div class="p-3 bg-muted/50 rounded-md border">
+                <p><strong>Ejemplo de aplicación:</strong><br>
+                ☕ Doña Rosa, 52 años, vendedora de tintos en Girardot. Con esfuerzo salió adelante y hoy invierte en un Contrato Abierto que le da liquidez y ganancias cada 15 días. Así vive más holgada y con nuevas oportunidades para su negocio y su familia.</p>
+            </div>
+        </div>
+    </details>
+
+    <details class="group border rounded-lg overflow-hidden">
+        <summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-muted">
+            <div class="flex items-center gap-3">
+                <span class="text-xl">🔒</span>
+                <h4 class="font-semibold">Contrato Cerrado</h4>
+            </div>
+            <span class="transition-transform duration-300 group-open:rotate-180">▼</span>
+        </summary>
+        <div class="p-4 border-t text-sm text-muted-foreground space-y-3">
+            <p><strong>Mayor rendimiento, concentración y a largo plazo.</strong></p>
+            <p>Ideal para quienes buscan maximizar resultados sin necesidad de retiros mensuales.</p>
+            <div class="p-3 bg-muted/50 rounded-md border">
+                <p><strong>Ejemplo de aplicación:</strong><br>
+                📱 Julián, 38 años, microempresario en Girardot. Empezó arreglando celulares con lo justo, pero nunca dejó de soñar. Hoy invierte en un contrato cerrado de 3 meses que le da rentabilidad y el impulso para cumplir metas y seguir creciendo.</p>
+            </div>
+        </div>
+    </details>
                         <input type="hidden" name="investment_contract_type" :value="form.investment_contract_type">
                         <div class="grid gap-2">
                             <Label>Tipo de Contrato</Label>
                             <div class="flex items-center space-x-4 rounded-md border p-2 bg-background">
-                                <label
-                                    class="flex items-center space-x-2 cursor-pointer p-2 rounded-md flex-1 justify-center transition-colors"
-                                    :class="{ 'bg-muted': form.investment_contract_type === 'abierta' }">
-                                    <input type="radio" v-model="form.investment_contract_type" value="abierta"
-                                        class="sr-only" />
-                                    <span>Contrato Abierto</span>
-                                </label>
-                                <label
-                                    class="flex items-center space-x-2 cursor-pointer p-2 rounded-md flex-1 justify-center transition-colors"
-                                    :class="{ 'bg-muted': form.investment_contract_type === 'cerrado' }">
-                                    <input type="radio" v-model="form.investment_contract_type" value="cerrada"
-                                        class="sr-only" />
-                                    <span>Contrato Cerrado</span>
-                                </label>
-                            </div>
+    <label 
+        class="flex items-center space-x-2 cursor-pointer p-2 rounded-md flex-1 justify-center transition-all duration-200" 
+        :class="{
+            'bg-muted': form.investment_contract_type === 'abierta',
+            'opacity-60': form.investment_contract_type !== 'abierta'
+        }"
+    >
+        <input type="radio" v-model="form.investment_contract_type" value="abierta" class="sr-only" />
+        <span>Abierto</span>
+    </label>
+
+    <label 
+        class="flex items-center space-x-2 cursor-pointer p-2 rounded-md flex-1 justify-center transition-all duration-200" 
+        :class="{
+            'bg-muted': form.investment_contract_type === 'cerrada',
+            'opacity-60': form.investment_contract_type !== 'cerrada'
+        }"
+    >
+        <input type="radio" v-model="form.investment_contract_type" value="cerrada" class="sr-only" />
+        <span>Cerrado</span>
+    </label>
+</div>
                         </div>
                         <div class="grid gap-2">
                             <Label for="amount">Monto Base</Label>
-                            <Input id="amount" type="number" v-model="form.amount" required
-                                placeholder="Mínimo $200.000" min="200000" max="5000000" step="100000" />
+                            <div class="relative">
+                                <Input id="amount" type="text" :value="formattedAmount" required v-model="form.amount"
+                                    placeholder="Usa +/- para ajustar" readonly
+                                    class="pr-20 text-center font-bold text-lg" />
+                                <div class="absolute inset-y-0 right-0 flex items-center">
+                                    <Button type="button" @click="decreaseAmount" variant="ghost" size="icon"
+                                        class="h-full rounded-none [touch-action:manipulation]"
+                                        :disabled="parseFloat(form.amount) <= 200000">
+                                        <MinusCircle class="h-6 w-6" />
+                                    </Button>
+                                    <Button type="button" @click="increaseAmount" variant="ghost" size="icon"
+                                        class="h-full rounded-l-none [touch-action:manipulation]"
+                                        :disabled="parseFloat(form.amount) >= 5000000">
+                                        <PlusCircle class="h-6 w-6" />
+                                    </Button>
+                                </div>
+                            </div>
                             <InputError :message="form.errors.amount" />
                         </div>
                         <div class="grid gap-2">
                             <Label for="receipt">Adjunta tu comprobante de pago</Label>
                             <Input id="receipt" type="file"
                                 @input="form.receipt = ($event.target as HTMLInputElement).files?.[0] ?? null"
-                                required />
+                                accept="image/*" required />
                             <InputError :message="form.errors.receipt" />
                         </div>
                         <div v-if="calculatedPayments.length > 0" class="grid gap-2">

@@ -85,95 +85,119 @@
 }
 
 :root {
-  /* Base - Fondo cálido y texto carbón */
-  --background: hsl(39 20% 98%); /* Blanco hueso muy sutil */
-  --foreground: hsl(220 15% 20%); /* Gris carbón oscuro y profundo */
-  
-  /* Tarjetas y popovers - Blanco puro para contraste */
+  /* Base - Fondo claro y texto oscuro */
+  --background: hsl(30 30% 98%); /* Blanco cálido ligeramente anaranjado */
+  --foreground: hsl(210 15% 15%); /* Gris carbón profundo para texto */
+
+  /* Tarjetas y popovers */
   --card: hsl(0 0% 100%);
-  --card-foreground: hsl(220 15% 20%);
+  --card-foreground: hsl(210 15% 15%);
   --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(220 15% 20%);
+  --popover-foreground: hsl(210 15% 15%);
 
-  /* Primario - El dorado como protagonista */
-  --primary: hsl(42 78% 48%); /* Dorado elegante, no muy amarillo */
-  --primary-foreground: hsl(220 15% 20%); /* Texto oscuro sobre el dorado para legibilidad */
+  /* Primario - Color principal (Rojo anaranjado) */
+  --primary: #F04526;
+  --primary-foreground: hsl(0 0% 100%); /* Texto blanco para contraste */
 
-  /* Secundarios y Acentos - Una gama de grises cálidos */
-  --secondary: hsl(39 15% 94%); /* Gris claro con un toque cálido */
-  --secondary-foreground: hsl(220 15% 25%);
-  --muted: hsl(39 15% 96%);
-  --muted-foreground: hsl(220 8% 45%);
-  --accent: hsl(39 15% 92%);
-  --accent-foreground: hsl(220 15% 20%);
+  /* Secundarios - Tonos suaves derivados del primario */
+  --secondary: hsl(14 80% 96%); /* Fondo muy claro derivado del rojo */
+  --secondary-foreground: hsl(14 80% 30%); /* Texto más oscuro del mismo tono */
+  
+  /* Muted - Grises cálidos para separar secciones */
+  --muted: hsl(15 20% 94%);
+  --muted-foreground: hsl(15 10% 40%);
+  
+  /* Accent - Una versión suave del primario */
+  --accent: hsl(14 85% 90%);
+  --accent-foreground: hsl(14 80% 25%);
 
-  /* Destructivo - Un rojo más sobrio y corporativo */
-  --destructive: hsl(0 75% 50%);
+  /* Destructivo - Un rojo profundo más serio */
+  --destructive: hsl(0 70% 45%);
   --destructive-foreground: hsl(0 0% 100%);
 
-  /* Bordes, inputs y ring - Unificando con la paleta */
-  --border: hsl(39 10% 88%);
-  --input: hsl(39 10% 90%);
-  --ring: hsl(42 78% 48%); /* El 'ring' de foco ahora es dorado */
+  /* Bordes, inputs y ring */
+  --border: hsl(14 15% 88%);
+  --input: hsl(14 15% 92%);
+  --ring: #F04526; /* Foco en el color principal */
 
-  /* Charts - Una escala monocromática de grises y un acento dorado */
-  --chart-1: hsl(220 15% 30%);
-  --chart-2: hsl(220 12% 50%);
-  --chart-3: hsl(220 10% 70%);
-  --chart-4: hsl(42 78% 48%); /* El dorado como punto focal */
-  --chart-5: hsl(39 15% 90%);
+  /* Charts - Colores complementarios y derivados */
+  --chart-1: #F04526;  /* Principal */
+  --chart-2: hsl(14 80% 65%); /* Versión clara */
+  --chart-3: hsl(14 80% 80%); /* Aún más clara */
+  --chart-4: hsl(200 70% 40%); /* Complementario (azul petróleo) */
+  --chart-5: hsl(15 20% 92%); /* Neutral */
 
-  /* Bordes redondeados (sin cambios) */
+  /* Bordes redondeados */
   --radius: 0.5rem;
 
-  /* Sidebar - Integrado con la nueva paleta */
+  /* Sidebar - Integrado con la paleta */
   --sidebar-background: hsl(0 0% 100%);
-  --sidebar-foreground: hsl(220 15% 25%);
-  --sidebar-primary: hsl(42 78% 48%);
-  --sidebar-primary-foreground: hsl(220 15% 20%);
-  --sidebar-accent: hsl(39 15% 94%);
-  --sidebar-accent-foreground: hsl(220 15% 20%);
-  --sidebar-border: hsl(39 10% 90%);
-  --sidebar-ring: hsl(42 78% 48%);
+  --sidebar-foreground: hsl(210 15% 20%);
+  --sidebar-primary: #F04526;
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(14 80% 96%);
+  --sidebar-accent-foreground: hsl(14 80% 30%);
+  --sidebar-border: hsl(14 15% 88%);
+  --sidebar-ring: #F04526;
   --sidebar: hsl(0 0% 100%);
 }
 
 
 .dark {
-    --background: hsl(0 0% 3.9%);
-    --foreground: hsl(0 0% 98%);
-    --card: hsl(0 0% 3.9%);
-    --card-foreground: hsl(0 0% 98%);
-    --popover: hsl(0 0% 3.9%);
-    --popover-foreground: hsl(0 0% 98%);
-    --primary: hsl(0 0% 98%);
-    --primary-foreground: hsl(0 0% 9%);
-    --secondary: hsl(0 0% 14.9%);
-    --secondary-foreground: hsl(0 0% 98%);
-    --muted: hsl(0 0% 16.08%);
-    --muted-foreground: hsl(0 0% 63.9%);
-    --accent: hsl(0 0% 14.9%);
-    --accent-foreground: hsl(0 0% 98%);
-    --destructive: hsl(0 84% 60%);
-    --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(0 0% 14.9%);
-    --input: hsl(0 0% 14.9%);
-    --ring: hsl(0 0% 83.1%);
-    --chart-1: hsl(220 70% 50%);
-    --chart-2: hsl(160 60% 45%);
-    --chart-3: hsl(30 80% 55%);
-    --chart-4: hsl(280 65% 60%);
-    --chart-5: hsl(340 75% 55%);
-    --sidebar-background: hsl(0 0% 7%);
-    --sidebar-foreground: hsl(0 0% 95.9%);
-    --sidebar-primary: hsl(360, 100%, 100%);
-    --sidebar-primary-foreground: hsl(0 0% 100%);
-    --sidebar-accent: hsl(0 0% 15.9%);
-    --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-    --sidebar-border: hsl(0 0% 15.9%);
-    --sidebar-ring: hsl(217.2 91.2% 59.8%);
-    --sidebar: hsl(240 5.9% 10%);
+  /* Base - Fondo profundo y texto claro */
+  --background: hsl(0 0% 5%); /* Negro suave, no absoluto */
+  --foreground: hsl(0 0% 96%); /* Texto claro ligeramente cálido */
+
+  /* Tarjetas y popovers */
+  --card: hsl(0 0% 7%);
+  --card-foreground: hsl(0 0% 96%);
+  --popover: hsl(0 0% 7%);
+  --popover-foreground: hsl(0 0% 96%);
+
+  /* Primario - Color protagonista (Rojo anaranjado) */
+  --primary: #F04526;
+  --primary-foreground: hsl(0 0% 100%); /* Texto blanco sobre primario */
+
+  /* Secundarios - Tonos oscuros cálidos */
+  --secondary: hsl(14 35% 18%); /* Fondo oscuro con matiz cálido */
+  --secondary-foreground: hsl(14 80% 85%); /* Texto más claro en secundario */
+
+  /* Muted - Grises cálidos para textos secundarios */
+  --muted: hsl(15 15% 15%);
+  --muted-foreground: hsl(15 10% 60%);
+
+  /* Accent - Un rojo anaranjado más suave */
+  --accent: hsl(14 85% 25%);
+  --accent-foreground: hsl(0 0% 100%);
+
+  /* Destructivo - Un rojo más profundo y serio */
+  --destructive: hsl(0 70% 45%);
+  --destructive-foreground: hsl(0 0% 100%);
+
+  /* Bordes, inputs y ring */
+  --border: hsl(15 15% 18%);
+  --input: hsl(15 15% 20%);
+  --ring: #F04526;
+
+  /* Charts - Rojos y complementarios */
+  --chart-1: #F04526; /* Principal */
+  --chart-2: hsl(14 80% 60%); /* Rojo más claro */
+  --chart-3: hsl(14 70% 40%); /* Rojo más oscuro */
+  --chart-4: hsl(200 70% 50%); /* Azul petróleo para contraste */
+  --chart-5: hsl(15 30% 25%); /* Neutro oscuro para balance */
+
+  /* Sidebar - Integrado con la nueva paleta */
+  --sidebar-background: hsl(0 0% 7%);
+  --sidebar-foreground: hsl(0 0% 95%);
+  --sidebar-primary: #F04526;
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(14 35% 18%);
+  --sidebar-accent-foreground: hsl(14 80% 85%);
+  --sidebar-border: hsl(15 15% 20%);
+  --sidebar-ring: #F04526;
+  --sidebar: hsl(0 0% 7%);
 }
+
 
 .collapse {
     visibility: visible !important;
@@ -186,4 +210,40 @@
     body {
         @apply bg-background text-foreground;
     }
+}
+
+
+.animate-spotlight {
+  position: relative; /* Necesario para posicionar el punto de luz */
+  overflow: hidden;   /* Oculta el punto de luz cuando está fuera del botón */
+}
+
+/* El punto de luz y su estela */
+.animate-spotlight::before {
+  content: '';
+  position: absolute;
+  width: 100px; /* Ancho del "cometa" */
+  height: 100%; /* Altura del botón */
+  /* Creamos un gradiente radial que es blanco en el centro (el punto) y se desvanece */
+  background: radial-gradient(circle at center, hsl(var(--primary)) 2%, transparent 25%);
+  animation: move-spotlight 4s linear infinite; /* Llama a la animación */
+}
+
+/* La animación que mueve el punto de luz alrededor del borde */
+@keyframes move-spotlight {
+  0% {
+    transform: translate(-100%, -100%) rotate(0deg);
+  }
+  25% {
+    transform: translate(0%, -100%) rotate(0deg);
+  }
+  50% {
+    transform: translate(0%, 0%) rotate(180deg);
+  }
+  75% {
+    transform: translate(-100%, 0%) rotate(180deg);
+  }
+  100% {
+    transform: translate(-100%, -100%) rotate(360deg);
+  }
 }

@@ -1,116 +1,106 @@
 <script setup lang="ts">
-import NavFooter from '@/components/NavFooter.vue';
+import { computed } from 'vue'; // Import computed
 import NavMain from '@/components/NavMain.vue';
-import NavUser from '@/components/NavUser.vue';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
-// 👇 Importa el helper `usePage` y los nuevos iconos
 import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Button } from '@/components/ui/button';
 import { 
     LayoutGrid, 
     Users, 
     ArrowLeftRight, 
     FileText, 
     Wallet, 
-    CheckCircle 
+    CheckCircle,
+    Settings,
+    LogOut,
 } from 'lucide-vue-next';
 
-import AppLogo from './AppLogo.vue';
-
-// 1. Obtenemos los datos de la página, que incluyen al usuario autenticado
+// 1. Obtenemos los datos de la página
 const page = usePage();
-const user = page.props.auth.user;
+const user = computed(() => page.props.auth.user);
 
-// 2. Creamos el array base con los items que todos pueden ver
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Inicio',
-        href: route('dashboard'), // Usamos el helper route()
-        icon: LayoutGrid,
-        // active: route().current('dashboard'),
-    },
-];
-
-// 3. Si el usuario es admin, añadimos los enlaces de administración
-if (user && user.rol === 'admin') {
-    mainNavItems.splice(0, mainNavItems.length,
-        {
-            title: 'Dashboard',
-            href: route('admin.dashboard'),
-            icon: LayoutGrid,
-        },
-        {
-            title: 'Aprobar Suscripciones',
-            href: route('admin.subscriptions.pending'),
-            icon: CheckCircle,
-        },
-        {
-            title: 'Gestionar Retiros',
-            href: route('admin.withdrawals.index'),
-            icon: Wallet,
-        },
-        // --- INICIA EL BLOQUE AÑADIDO ---
-        {
-            title: 'Reporte Suscripciones',
-            href: route('admin.reports.subscriptions'),
-            icon: FileText,
-        },
-        {
-            title: 'Reporte Pagos',
-            href: route('admin.reports.payments'),
-            icon: FileText,
-        },
-        {
-            title: 'Reporte Retiros',
-            href: route('admin.reports.withdrawals'),
-            icon: FileText,
-        },
-        // --- FIN DEL BLOQUE AÑADIDO ---
-        {
-            title: 'Gestionar Usuarios',
-            href: route('admin.users.index'), // Cambia a la ruta correcta
-            icon: Users,
-        }
-    );
-}
-
-
-const footerNavItems: NavItem[] = [];
+// 2. Creamos una propiedad computada para el menú, que reacciona a los cambios
+const mainNavItems = computed<NavItem[]>(() => {
+    if (user.value && user.value.rol === 'admin') {
+        // MENÚ PARA ADMINISTRADORES
+        return [
+            { title: 'Dashboard', href: route('admin.dashboard'), icon: LayoutGrid },
+            { title: 'Aprobar Suscripciones', href: route('admin.subscriptions.pending'), icon: CheckCircle },
+            { title: 'Gestionar Retiros', href: route('admin.withdrawals.index'), icon: Wallet },
+            { title: 'Reporte Suscripciones', href: route('admin.reports.subscriptions'), icon: FileText },
+            { title: 'Reporte Pagos', href: route('admin.reports.payments'), icon: FileText },
+            { title: 'Reporte Retiros', href: route('admin.reports.withdrawals'), icon: FileText },
+            { title: 'Gestionar Usuarios', href: route('admin.users.index'), icon: Users },
+        ];
+    }
+    
+    // MENÚ PARA USUARIOS NORMALES
+    return [
+        { title: 'Inicio', href: route('dashboard'), icon: LayoutGrid },
+        { title: 'Mis Referidos', href: route('referrals.index'), icon: Users },
+    ];
+});
 </script>
 
 <template>
     <Sidebar collapsible="icon" variant="inset">
-        <SidebarHeader>
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <SidebarMenuButton size="lg" as-child>
-                        <Link :href="route('dashboard')">
-                        <div class="flex items-center gap-2">
-                            <!-- Logo -->
-                            <div class="mb-1 flex h-9 w-9 items-center justify-center rounded-md overflow-hidden">
-                                <img src="/img/icons/icon-72x72.png" alt="Mi Logo"
-                                    class="w-full h-full object-contain" />
-                            </div>
+       <SidebarHeader class="p-4">
+    <Link :href="route('dashboard')" class="flex flex-col items-center gap-2">
+        
+        <div class="flex h-18 w-18 items-center justify-center rounded-lg overflow-hidden bg-white shadow-sm">
+            <img 
+                src="/img/icons/icon-72x72.png" 
+                alt="Mi Logo"
+                class="w-18 h-18 object-contain" 
+            />
+        </div>
 
-                            <!-- Texto -->
-                            <span class="text-base font-medium text-foreground">
-                                Finance PWA
-                            </span>
+        <span class="text-2xl font-bold text-foreground">
+            EON
+        </span>
+        <span class="text-base font-bold text-foreground">
+            Grupo Empresarial
+        </span>
+
+    </Link>
+</SidebarHeader>
+
+        <SidebarContent class="flex flex-col">
+            <NavMain :items="mainNavItems" class="flex-grow" />
+            
+            <div v-if="user" class="mt-auto p-2 border-t">
+                <div class="flex items-center gap-3 px-2 py-3">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
+                        <Users class="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <div class="flex flex-col text-left">
+                        <span class="text-sm font-medium text-foreground truncate">{{ user.nombres }} {{ user.apellidos }}</span>
+                        <div v-if="user.rank" class="flex items-center gap-1.5">
+                            <span class="text-xs">🥉</span>
+                            <span class="text-xs font-semibold text-primary">{{ user.rank.name }}</span>
                         </div>
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-            </SidebarMenu>
-        </SidebarHeader>
+                    </div>
+                </div>
+                <nav class="grid gap-1">
+                    <Link :href="route('profile.edit')" class="w-full">
+                        <Button variant="ghost" class="w-full justify-start text-sm">
+                            
+                            Ajustes de Perfil
+                        </Button>
+                    </Link>
+                    <Link :href="route('logout')" method="post" as="button" class="w-full">
+                        <Button variant="ghost" class="w-full justify-start text-sm">
+                           
+                            Cerrar Sesión
+                        </Button>
+                    </Link>
+                </nav>
+            </div>
+            </SidebarContent>
+        
+        <SidebarFooter></SidebarFooter>
 
-        <SidebarContent>
-            <NavMain :items="mainNavItems" />
-        </SidebarContent>
-
-        <SidebarFooter>
-            <NavFooter :items="footerNavItems" />
-            <NavUser />
-        </SidebarFooter>
     </Sidebar>
     <div class="flex min-h-screen flex-col">
         <slot />

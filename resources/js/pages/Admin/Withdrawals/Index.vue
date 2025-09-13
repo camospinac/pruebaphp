@@ -11,6 +11,7 @@ import { throttle } from 'lodash';
 interface User {
     nombres: string;
     apellidos: string;
+    identification_number: string;
 }
 
 interface Withdrawal {
@@ -20,6 +21,8 @@ interface Withdrawal {
     status: string;
     created_at: string;
     user: User;
+    payment_method: string;
+    destination_phone_number: string;
 }
 
 interface Link {
@@ -104,6 +107,9 @@ const formatDate = (dateString: string) => {
                         <tr>
                             <th scope="col" class="px-4 py-3 font-medium">Código</th>
                             <th scope="col" class="px-4 py-3 font-medium">Usuario</th>
+                            <th class="px-4 py-3 font-medium"># Documento</th>
+                            <th class="px-4 py-3 font-medium">Método Pago</th>
+                            <th class="px-4 py-3 font-medium">Teléfono Destino</th>
                             <th scope="col" class="px-4 py-3 font-medium text-right">Monto</th>
                             <th scope="col" class="px-4 py-3 font-medium">Fecha Solicitud</th>
                             <th scope="col" class="px-4 py-3 font-medium text-center">Acción</th>
@@ -113,6 +119,9 @@ const formatDate = (dateString: string) => {
                         <tr v-for="w in withdrawals.data" :key="w.id" class="border-b">
                             <td class="px-4 py-3 font-mono font-bold">{{ w.code }}</td>
                             <td class="px-4 py-3 text-muted-foreground">{{ w.user.nombres }} {{ w.user.apellidos }}</td>
+                            <td class="px-4 py-3 text-muted-foreground">{{ w.user.identification_number }}</td>
+                            <td class="px-4 py-3 font-semibold">{{ w.payment_method }}</td>
+                            <td class="px-4 py-3 font-mono">{{ w.destination_phone_number }}</td>
                             <td class="px-4 py-3 font-mono text-right">{{ formatCurrency(w.amount) }}</td>
                             <td class="px-4 py-3 text-muted-foreground">{{ formatDate(w.created_at) }}</td>
                             <td class="px-4 py-3 text-center">

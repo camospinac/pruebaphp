@@ -1,11 +1,46 @@
 /********** Template CSS **********/
 :root {
-    --primary: #06A3DA;
+    --primary: #F04526;
     --secondary: #34AD54;
     --light: #EEF9FF;
     --dark: #091E3E;
 }
 
+.btn-primary {
+  color: white !important;
+  background-color: #F04526 !important;
+    border-color: #F04526 !important;
+}
+
+.text-primary{
+    color: #F04526 !important;
+}
+
+.bg-primary{
+    background-color: #F04526 !important;
+}
+
+
+
+.navbar-dark {
+  background-color: rgba(240, 69, 38, 0.1) !important;
+}
+
+.bg-light {
+  background-color: #FDE2DC !important;
+}
+
+.btn-dark{
+    color: black !important;
+    background-color: white !important;
+    border-color: white !important;
+}
+
+
+.bg-dark{
+    background-color: rgba(240, 69, 38, 0.1) !important;
+    color: white !important;
+}
 
 /*** Spinner ***/
 .spinner {
@@ -221,7 +256,7 @@ h6,
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(9, 30, 62, .7);
+    background: rgba(240, 69, 38, 0.3);
     z-index: 1;
 }
 

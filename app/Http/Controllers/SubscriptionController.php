@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NewSubscriptionEmail;
+use App\Mail\SubscriptionPendingEmail;
 
 class SubscriptionController extends Controller
 {
@@ -18,6 +21,9 @@ class SubscriptionController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = $request->user();
+
+        $lastSequence = $user->subscriptions()->max('sequence_id');
+        $newSequenceId = $lastSequence + 1;
 
         // Lógica para calcular el saldo disponible (esto está perfecto)
         $abonos = $user->transactions()->where('tipo', 'abono')->sum('monto');
@@ -52,8 +58,9 @@ class SubscriptionController extends Controller
     ]);
 
         $plan = Plan::findOrFail($request->plan_id);
+        $newSubscription = null;
 
-        DB::transaction(function () use ($user, $plan, $request) {
+        DB::transaction(function () use ($user, $plan, $request, &$newSubscription, $newSequenceId) {
             $receiptPath = null;
             $status = '';
 
@@ -74,18 +81,29 @@ class SubscriptionController extends Controller
             }
 
             // Creamos la nueva suscripción
-            $subscription = $user->subscriptions()->create([
+            $newSubscription = $user->subscriptions()->create([
                 'plan_id' => $plan->id,
                 'initial_investment' => $request->amount,
                 'status' => $status,
                 'payment_receipt_path' => $receiptPath,
                 'contract_type' => $request->investment_contract_type,
+                'sequence_id' => $newSequenceId,
             ]);
 
             // 3. ¡AQUÍ ESTÁ LA MAGIA!
             // En lugar de todo el código duplicado, solo llamamos a nuestro "ayudante".
-            $this->createPaymentSchedule($subscription);
+            $this->createPaymentSchedule($newSubscription);
         });
+
+        if ($newSubscription) {
+            // Enviamos la confirmación al usuario
+            Mail::to($user->email)->send(new NewSubscriptionEmail($newSubscription));
+            
+            // Si está pendiente, notificamos al admin
+            if ($newSubscription->status === 'pending_verification') {
+                Mail::to('camospinac@outlook.com')->send(new SubscriptionPendingEmail($newSubscription));
+            }
+        }
 
         return redirect()->route('dashboard')->with('success', '¡Tu nueva inversión ha sido creada con éxito!');
     }

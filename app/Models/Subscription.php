@@ -15,6 +15,8 @@ class Subscription extends Model
         'status',
         'payment_receipt_path',
         'contract_type',
+        'sequence_id',
+        'profit_amount',
     ];
 
     public function user() {

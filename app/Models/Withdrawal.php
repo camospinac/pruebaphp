@@ -20,6 +20,8 @@ class Withdrawal extends Model
         'code',
         'amount',
         'status',
+        'payment_method',
+        'destination_phone_number',
     ];
 
     /**

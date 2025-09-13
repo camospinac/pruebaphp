@@ -8,11 +8,17 @@ import AuthBase from '@/layouts/AuthLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
 import { ref } from 'vue';
+import { Eye, EyeOff } from 'lucide-vue-next';
+
+const showPassword = ref(false);
+const showPasswordConfirmation = ref(false);
 
 const showReferralInput = ref(false);
 const form = useForm({
     nombres: '',
     apellidos: '',
+    identification_type: 'CEDULA CIUDANIA', // Valor por defecto
+    identification_number: '',
     celular: '',
     email: '',
     password: '',
@@ -52,6 +58,26 @@ const submit = () => {
                     <InputError :message="form.errors.apellidos" />
                 </div>
 
+                <div class="grid gap-2">
+                    <Label for="identification_type">Tipo de Documento</Label>
+                    <select id="identification_type" v-model="form.identification_type"
+                        class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        required>
+                        <option>CEDULA CIUDANIA</option>
+                        <option>TARJETA IDENTIDAD</option>
+                        <option>CEDULA EXTRANJERIA</option>
+                        <option>PASAPORTE</option>
+                    </select>
+                    <InputError :message="form.errors.identification_type" />
+                </div>
+
+                <div class="grid gap-2">
+                    <Label for="identification_number">Número de Documento</Label>
+                    <Input id="identification_number" type="text" v-model="form.identification_number" required
+                        autocomplete="off" placeholder="Número de Documento"/>
+                    <InputError :message="form.errors.identification_number" />
+                </div>
+
 
                 <div class="grid gap-2">
                     <Label for="celular">Celular</Label>
@@ -81,19 +107,50 @@ const submit = () => {
                 </div>
 
                 <div class="grid gap-2">
-                    <Label for="password">Contraseña</Label>
-                    <Input id="password" type="password" required :tabindex="5" autocomplete="new-password"
-                        v-model="form.password" placeholder="Contraseña" />
-                    <InputError :message="form.errors.password" />
-                </div>
+    <Label for="password">Contraseña</Label>
+    <div class="relative">
+        <Input 
+            id="password" 
+            :type="showPassword ? 'text' : 'password'" 
+            class="pr-10"
+            required 
+            v-model="form.password" 
+            placeholder="Contraseña" 
+        />
+        <button 
+            type="button" 
+            @click="showPassword = !showPassword" 
+            class="absolute inset-y-0 right-0 flex items-center justify-center h-full px-3 text-muted-foreground"
+        >
+            <Eye v-if="!showPassword" class="h-5 w-5" />
+            <EyeOff v-else class="h-5 w-5" />
+        </button>
+    </div>
+    <InputError :message="form.errors.password" />
+</div>
 
-
-                <div class="grid gap-2">
-                    <Label for="password_confirmation">Confirmar contraseña</Label>
-                    <Input id="password_confirmation" type="password" required :tabindex="6" autocomplete="new-password"
-                        v-model="form.password_confirmation" placeholder="Confirmar contraseña" />
-                    <InputError :message="form.errors.password_confirmation" />
-                </div>
+<div class="grid gap-2">
+    <Label for="password_confirmation">Confirmar contraseña</Label>
+    <div class="relative">
+        <Input 
+            id="password_confirmation" 
+            :type="showPasswordConfirmation ? 'text' : 'password'" 
+            class="pr-10"
+            required 
+            v-model="form.password_confirmation" 
+            placeholder="Confirmar contraseña" 
+        />
+        <button 
+            type="button" 
+            @click="showPasswordConfirmation = !showPasswordConfirmation" 
+            class="absolute inset-y-0 right-0 flex items-center justify-center h-full px-3 text-muted-foreground"
+        >
+            <Eye v-if="!showPasswordConfirmation" class="h-5 w-5" />
+            <EyeOff v-else class="h-5 w-5" />
+        </button>
+    </div>
+    <InputError :message="form.errors.password_confirmation" />
+</div>
 
 
                 <Button type="submit" class="mt-2 w-full" tabindex="7" :disabled="form.processing">

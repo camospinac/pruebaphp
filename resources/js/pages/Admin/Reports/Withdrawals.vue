@@ -12,6 +12,7 @@ import { Search, FilterX } from 'lucide-vue-next';
 interface User {
     nombres: string;
     apellidos: string;
+    identification_number: string;
 }
 interface Withdrawal {
     id: number;
@@ -132,6 +133,7 @@ const formatDate = (dateString: string) => {
                         <tr>
                             <th class="px-4 py-3 font-medium">Código</th>
                             <th class="px-4 py-3 font-medium">Usuario</th>
+                            <th class="px-4 py-3 font-medium"># Documento</th>
                             <th class="px-4 py-3 font-medium text-right">Monto</th>
                             <th class="px-4 py-3 font-medium text-center">Estado</th>
                             <th class="px-4 py-3 font-medium text-right">Fecha Solicitud</th>
@@ -142,6 +144,7 @@ const formatDate = (dateString: string) => {
                         <tr v-for="w in withdrawals.data" :key="w.id" class="border-b">
                             <td class="px-4 py-3 font-mono font-bold">{{ w.code }}</td>
                             <td class="px-4 py-3">{{ w.user.nombres }} {{ w.user.apellidos }}</td>
+                            <td class="px-4 py-3">{{ w.user.identification_number }}</td>
                             <td class="px-4 py-3 font-mono text-right">{{ formatCurrency(w.amount) }}</td>
                             <td class="px-4 py-3 text-center">
                                 <span class="px-2 py-1 text-xs font-semibold rounded-full capitalize" :class="{

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Notifications\CustomResetPasswordNotification;
 
 class User extends Authenticatable
 {
@@ -27,6 +28,8 @@ class User extends Authenticatable
         'rol',
         'referral_code',
         'referred_by_id',
+        'identification_type',
+        'identification_number',
     ];
 
     /**
@@ -86,5 +89,9 @@ class User extends Authenticatable
     public function referrals()
     {
         return $this->hasMany(User::class, 'referred_by_id');
+    }
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new CustomResetPasswordNotification($token));
     }
 }

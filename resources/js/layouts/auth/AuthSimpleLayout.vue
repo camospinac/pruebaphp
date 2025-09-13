@@ -19,7 +19,7 @@ withDefaults(defineProps<{
             <div class="flex flex-col gap-8">
                 <div class="flex flex-col items-center gap-4">
                     <Link :href="route('home')" class="flex flex-col items-center gap-2 font-medium">
-                    <div v-if="showLogo" class="mb-1 flex h-20 w-20 items-center justify-center rounded-md overflow-hidden">
+                    <div class="mb-1 flex h-30 w-30 items-center justify-center rounded-md overflow-hidden">
                         <img src="/img/icons/icon-72x72.png" alt="Mi Logo" class="w-full h-full object-contain" />
                     </div>
                     <span class="sr-only">{{ title }}</span>
